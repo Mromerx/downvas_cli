@@ -19,7 +19,7 @@ DownVas es una herramienta de interfaz de línea de comandos (CLI) escrita en Py
 
 ## Requisitos
 
-- Python 3.7+
+- Python 3.10+
 - Dependencias (pueden ser instaladas vía `requirements.txt`):
   - `requests`
   - `rich`
