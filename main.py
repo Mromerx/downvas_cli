@@ -8,8 +8,6 @@ import sys
 from typing import Dict, Optional, List
 
 from rich.prompt import Confirm, Prompt
-from rich.panel import Panel
-from rich.table import Table
 from rich.rule import Rule
 
 from src.theme import console
@@ -44,7 +42,6 @@ def run_config_wizard() -> Settings:
     current_dir = str(settings.download_dir)
     download_dir = Prompt.ask("Carpeta de descarga local", default=current_dir).strip()
     
-    # Update env file logic
     from pathlib import Path
     env_path = Path(".env")
     try:
@@ -69,7 +66,6 @@ def run_config_wizard() -> Settings:
         env_path.write_text("\n".join(env_lines) + "\n", encoding="utf-8")
         console.print("[success]Configuracion guardada en .env[/]\n")
         
-        # Reload settings
         import os
         os.environ["CANVAS_URL"] = canvas_url
         os.environ["CANVAS_TOKEN"] = api_token
@@ -176,27 +172,27 @@ def main() -> None:
             console.print(f"[error]Error al cargar curso: {e}[/]")
             
     while True:
-        console.print(Rule("[primary]MENU PRINCIPAL[/]"))
-        menu_table = Table.grid(padding=(0, 2))
-        menu_table.add_column(style="primary", justify="right")
-        menu_table.add_column()
+        console.print(Rule("[primary]MENU[/]"))
         menu_options = [
-            ("1", "Ver listado del curso"),
-            ("2", "Descargar un archivo"),
-            ("3", "Descargar varios archivos"),
-            ("4", "Descargar archivos por extension  (ej: .pdf)"),
-            ("5", "Descargar todos los archivos del curso"),
-            ("6", "Actualizar informacion del curso"),
-            ("7", "Cambiar de curso"),
-            ("8", "Cambiar URL de Canvas"),
-            ("9", "Cambiar token de acceso"),
+            ("1",  "Ver listado del curso"),
+            ("2",  "Descargar un archivo"),
+            ("3",  "Descargar varios archivos"),
+            ("4",  "Descargar archivos por extension (ej: .pdf)"),
+            ("5",  "Descargar todos los archivos del curso"),
+            ("6",  "Actualizar informacion del curso"),
+            ("7",  "Cambiar de curso"),
+            ("8",  "Cambiar URL de Canvas"),
+            ("9",  "Cambiar token de acceso"),
             ("10", "Salir"),
         ]
         for num, desc in menu_options:
-            menu_table.add_row(num, desc)
-        console.print(Panel(menu_table, expand=False))
-
-        option = Prompt.ask("\nOpcion", choices=[str(i) for i in range(1, 11)])
+            console.print(f" [primary]\\[{num}][/] {desc}")
+        console.print()
+        while True:
+            option = Prompt.ask("Opcion").strip()
+            if option in [str(i) for i in range(1, 11)]:
+                break
+            console.print("[error]Opcion invalida.[/]")
         
         if option == "1":
             console.print(rich_tree)
@@ -249,7 +245,6 @@ def main() -> None:
             console.print("[success]Actualizado.[/]")
             
         elif option == "7":
-            # Logic similar to initialization
             cid_str = Prompt.ask("\nID del nuevo curso").strip()
             cid = extract_course_id(cid_str)
             if cid:

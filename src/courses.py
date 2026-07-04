@@ -19,9 +19,6 @@ from src.core import (
     human_readable_size
 )
 
-# ==========================================
-# DOMAIN: Models
-# ==========================================
 @dataclass
 class CanvasCourse:
     id: int
@@ -59,7 +56,6 @@ class CourseTree:
         self.files: Dict[int, CanvasFile] = {}
         self.folders: Dict[int, CanvasFolder] = {}
         
-        # Hierarchy maps
         self.root_folder_id: Optional[int] = None
         self.subfolders_map: Dict[int, List[int]] = defaultdict(list)
         self.folder_files_map: Dict[int, List[CanvasFile]] = defaultdict(list)
@@ -136,9 +132,6 @@ class CourseTree:
         return None
 
 
-# ==========================================
-# DATA: API Client
-# ==========================================
 def _is_http_forbidden(e: Exception) -> bool:
     if isinstance(e, CanvasAPIError):
         return e.status_code in (401, 403)
@@ -252,7 +245,6 @@ class CanvasAPIClient:
 
         tree = CourseTree(course)
 
-        # 1. Modules
         try:
             for module in self.get_modules(course_id):
                 mname = module.get("name", f"Modulo {module.get('id')}")
@@ -275,7 +267,6 @@ class CanvasAPIClient:
         except (CanvasAPIError, requests.HTTPError) as e:
             if not _is_http_forbidden(e): raise
 
-        # 2. Folders
         try:
             for f in self.get_folders(course_id):
                 tree.add_folder(CanvasFolder(
@@ -288,7 +279,6 @@ class CanvasAPIClient:
         except (CanvasAPIError, requests.HTTPError) as e:
             if not _is_http_forbidden(e): raise
 
-        # 3. Files
         try:
             for f in self.get_files(course_id):
                 fid = f.get("id")
@@ -298,6 +288,8 @@ class CanvasAPIClient:
                 if existing:
                     if existing.folder_id is None and folder_id is not None:
                         existing.folder_id = folder_id
+                    if not existing.size and f.get("size"):
+                        existing.size = f.get("size")
                 else:
                     tree.add_file(CanvasFile(
                         id=fid,
@@ -316,9 +308,6 @@ class CanvasAPIClient:
         return tree
 
 
-# ==========================================
-# PRESENTATION: Rich Tree View
-# ==========================================
 def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
     """Builds a rich Tree and returns a mapping from index -> file_id."""
     root_node = Tree(f"[primary][Curso] {course_tree.course.name}[/]")
@@ -355,7 +344,7 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         mdict = defaultdict(list)
         for f in module_files: mdict[f.module_name].append(f)
         for mname, fs in mdict.items():
-            mnode = root_node.add(f"[primary][Modulo] {mname}[/]")
+            mnode = root_node.add(f"[module][Modulo] {mname}[/]")
             fs.sort(key=lambda x: x.display_name.lower())
             for f in fs: _add_file(mnode, f)
             

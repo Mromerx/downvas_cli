@@ -21,9 +21,6 @@ from rich.progress import (
 
 from src.core import CanvasAPIError
 
-# ==========================================
-# DOMAIN: Models
-# ==========================================
 @dataclass
 class DownloadJob:
     url: str
@@ -41,9 +38,6 @@ class DownloadSummary:
     total_bytes_downloaded: int = 0
     total_duration: float = 0.0
 
-# ==========================================
-# DATA: File Repository
-# ==========================================
 class FileDownloader:
     def __init__(self, base_url: str, token: str):
         self.base_url = base_url.rstrip("/")
@@ -55,35 +49,30 @@ class FileDownloader:
         if job.destination.exists():
             local_size = os.path.getsize(job.destination)
             if job.expected_size is None or local_size == job.expected_size:
-                return 0 # Skipped/Already exists
+                return 0
 
         job.destination.parent.mkdir(parents=True, exist_ok=True)
         bytes_dl = 0
         part_file = job.destination.with_name(job.destination.name + '.part')
         
         try:
-            # 1. Consultar /api/v1/files/{id} para obtener metadatos
             api_url = f"{self.base_url}/api/v1/files/{job.file_id}"
             meta_resp = self.session.get(api_url, timeout=10)
             meta_resp.raise_for_status()
             
-            # 2. Extraer el campo url de la respuesta
             meta_json = meta_resp.json()
             download_url = meta_json.get("url")
             
             if not download_url:
                 raise CanvasAPIError(f"No se encontro la URL de descarga para el archivo {job.display_name}")
 
-            # 3. Descargar el archivo utilizando esa URL, siguiendo redirecciones
             with requests.get(download_url, stream=True, allow_redirects=True, timeout=30) as r:
                 r.raise_for_status()
                 
-                # 5. Validar que la respuesta de descarga sea correcta antes de escribir (evitar HTML o JSON de error)
                 content_type = r.headers.get("Content-Type", "")
                 if "application/json" in content_type and not job.display_name.lower().endswith(".json"):
                     raise CanvasAPIError("La descarga devolvio JSON inesperado en lugar de binario.")
                 
-                # 4. Guardar el contenido binario del archivo temporalmente
                 with open(part_file, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
                         if chunk:
@@ -92,29 +81,23 @@ class FileDownloader:
                             if progress_callback:
                                 progress_callback(len(chunk))
             
-            # Renombrar archivo temporal al original una vez completado con éxito
             if part_file.exists():
                 part_file.replace(job.destination)
                 
             return bytes_dl
         except Exception as e:
-            # 6. Si falla, limpiar archivo temporal y no dejar archivos corruptos
             if part_file.exists():
                 try:
                     part_file.unlink()
                 except OSError:
                     pass
             if job.destination.exists() and bytes_dl > 0:
-                # Solo borramos el destino si se llego a crear algo (poco probable si escribimos en .part)
                 try:
                     job.destination.unlink()
                 except OSError:
                     pass
             raise CanvasAPIError(f"Error descargando {job.display_name}: {e}")
 
-# ==========================================
-# PRESENTATION & DOMAIN ORCHESTRATION: Progress and Queue
-# ==========================================
 class DownloaderService:
     def __init__(self, base_url: str, token: str):
         self.downloader = FileDownloader(base_url, token)
@@ -181,7 +164,6 @@ class DownloaderService:
 
         summary.total_duration = max(0.1, time.time() - start_time)
 
-        # Show final rich summary
         console.print("\n" + "=" * 52)
         console.print("[success]RESUMEN DE DESCARGA[/]")
         console.print("=" * 52)

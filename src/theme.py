@@ -7,7 +7,8 @@ custom_theme = Theme({
     "success": "bold green",
     "error": "bold red",
     "warning": "bold yellow",
-    "muted": "dim"
+    "muted": "dim",
+    "module": "white"
 })
 
 console = Console(theme=custom_theme)
