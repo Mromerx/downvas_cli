@@ -99,7 +99,7 @@ def handle_download_single(course_tree: CourseTree, settings: Settings, download
     file = resolve_file(course_tree, query, index_map)
     if file:
         dest = course_tree.get_file_download_path(file.id, settings.download_dir)
-        downloader.download_jobs([DownloadJob(file.url, dest, file.size, file.display_name, file.id)])
+        downloader.download_jobs([DownloadJob(file.url, dest, file.size, file.display_name, file.id, file.module_name is not None)])
     else:
         console.print("[error]Archivo no encontrado.[/]")
 
@@ -116,7 +116,7 @@ def handle_download_multi(course_tree: CourseTree, settings: Settings, downloade
         else:
             console.print("[error]No encontrado.[/]")
     if queue and Confirm.ask(f"[primary]Confirmar descarga de {len(queue)} archivos?[/]", default=True):
-        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in queue]
+        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in queue]
         downloader.download_jobs(jobs)
 
 def handle_download_by_ext(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
@@ -124,7 +124,7 @@ def handle_download_by_ext(course_tree: CourseTree, settings: Settings, download
     if ext:
         fs = course_tree.get_files_by_extension(ext)
         if fs and Confirm.ask(f"[primary]Descargar {len(fs)} archivos?[/]", default=True):
-            jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in fs]
+            jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in fs]
             downloader.download_jobs(jobs)
         elif not fs:
             console.print("[secondary]No se encontraron archivos.[/]")
@@ -132,7 +132,7 @@ def handle_download_by_ext(course_tree: CourseTree, settings: Settings, download
 def handle_download_all(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
     fs = course_tree.get_all_files()
     if fs and Confirm.ask(f"[primary]Descargar todo ({len(fs)} archivos)?[/]", default=True):
-        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in fs]
+        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in fs]
         downloader.download_jobs(jobs)
 
 def handle_refresh(course_id: int, api_client: CanvasAPIClient) -> Tuple[CourseTree, Tree, Dict[int, int]]:
@@ -227,8 +227,8 @@ def handle_download_by_section(course_tree: CourseTree, settings: Settings, down
             files_to_download = sections[selected_name]
             
             if Confirm.ask(f"[primary]Descargar {len(files_to_download)} archivos de la seccion '{selected_name}'?[/]", default=True):
-                jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in files_to_download]
-                downloader.download_jobs(jobs, from_modules=True)
+                jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in files_to_download]
+                downloader.download_jobs(jobs)
         else:
             console.print("[error]Opcion invalida.[/]")
     else:

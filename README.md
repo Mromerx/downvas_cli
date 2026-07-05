@@ -29,10 +29,12 @@ DownVas es una herramienta de interfaz de línea de comandos (CLI) escrita en Py
 ## Instalación
 
 1. Clona o descarga este repositorio.
-2. Activa tu entorno virtual (opcional pero recomendado):
+2. Crea y activa tu entorno virtual (opcional pero recomendado):
    ```bash
-   source env/bin/activate
+   python -m venv env
    ```
+   - **Linux/macOS**: `source env/bin/activate`
+   - **Windows**: `env\Scripts\activate`
 3. Instala las dependencias:
    ```bash
    pip install -r requirements.txt
@@ -58,15 +60,16 @@ Si es la primera vez que lo ejecutas, DownVas iniciará un asistente interactivo
 Una vez configurado y tras ingresar el ID de un curso (o su URL completa), se te presentará un menú interactivo con las siguientes opciones:
 
 1. **Ver listado del curso**: Imprime la estructura jerárquica de archivos, carpetas y módulos.
-2. **Descargar un archivo**: Selecciona y descarga un único archivo.
-3. **Descargar varios archivos**: Permite agregar archivos a una cola y descargarlos en lote.
-4. **Descargar archivos por extensión (ej: .pdf)**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
-5. **Descargar todos los archivos del curso**: Descarga el curso completo manteniendo la jerarquía de carpetas.
-6. **Actualizar información del curso**: Vuelve a cargar el árbol de archivos desde el servidor.
-7. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
-8. **Cambiar URL de Canvas**: Opción de reconfiguración.
-9. **Cambiar token de acceso**: Opción de reconfiguración.
-10. **Salir**
+2. **Actualizar información del curso**: Vuelve a cargar el árbol de archivos desde el servidor.
+3. **Descargar un archivo**: Selecciona y descarga un único archivo.
+4. **Descargar varios archivos**: Permite agregar archivos a una cola y descargarlos en lote.
+5. **Descargar archivos por extensión (ej: .pdf)**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
+6. **Descargar todos los archivos del curso**: Descarga el curso completo manteniendo la jerarquía de carpetas.
+7. **Descargar por sección**: Descarga todos los archivos de un módulo o carpeta específica.
+8. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
+9. **Cambiar URL de Canvas**: Opción de reconfiguración.
+10. **Cambiar token de acceso**: Opción de reconfiguración.
+11. **Salir**
 
 ## Estructura de Directorios
 

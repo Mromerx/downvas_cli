@@ -28,6 +28,7 @@ class DownloadJob:
     expected_size: Optional[int]
     display_name: str
     file_id: int
+    from_module: bool = False
 
 @dataclass
 class DownloadSummary:
@@ -102,21 +103,29 @@ class DownloaderService:
     def __init__(self, base_url: str, token: str):
         self.downloader = FileDownloader(base_url, token)
 
-    def download_jobs(self, jobs: List[DownloadJob], from_modules: bool = False) -> DownloadSummary:
+    def download_jobs(self, jobs: List[DownloadJob]) -> DownloadSummary:
         from rich.table import Table
         from rich.panel import Panel
+        from rich.progress import ProgressColumn
+        from rich.text import Text
         from src.core import human_readable_size
         import time
+
+        class CompletedSizeColumn(ProgressColumn):
+            def render(self, task) -> Text:
+                return Text(human_readable_size(task.completed), style="progress.download")
 
         summary = DownloadSummary()
         if not jobs:
             return summary
 
+        from_modules = any(j.from_module for j in jobs)
+
         if from_modules:
             progress = Progress(
                 TextColumn("[primary]{task.description}", justify="right"),
                 BarColumn(bar_width=40),
-                "[progress.percentage]{task.percentage:>3.1f}%",
+                CompletedSizeColumn(),
                 console=console,
             )
         else:
