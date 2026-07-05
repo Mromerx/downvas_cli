@@ -12,7 +12,7 @@ from src.courses import CanvasAPIClient, CourseTree, CanvasFile, build_rich_tree
 from src.downloader import DownloaderService, DownloadJob
 
 def run_config_wizard() -> Settings:
-    console.print("\n[primary]=== CONFIGURACIÓN DE DOWNVAS ===[/]")
+    console.print("\n[secondary]─[/] [primary]CONFIGURACIÓN DE DOWNVAS[/] [secondary]──────────────────────[/]")
     console.print("Por favor, configure los parámetros de conexión de Canvas LMS.\n")
     
     settings = Settings.load()

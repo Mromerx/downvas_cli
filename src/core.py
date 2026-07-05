@@ -40,7 +40,7 @@ class Settings(BaseModel):
 
     @property
     def is_configured(self) -> bool:
-        return bool(self.canvas_url and self.api_token)
+        return bool(self.canvas_url and self.api_token and os.getenv("CANVAS_DOWNLOAD_DIR"))
 
     @classmethod
     def load(cls) -> "Settings":

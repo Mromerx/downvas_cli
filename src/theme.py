@@ -20,7 +20,7 @@ custom_theme = Theme({
     "warning": "bold #F59E0B",      # ámbar
     "muted": "dim #7C3AED",         # morado tenue
     "module": "bold #818CF8",       # índigo claro
-    "prompt": "bold #A855F7",       # estilo del [y/n] en prompts
+    "prompt": "default",            # estilo del [y/n] en prompts
     "progress.percentage": "#D8B4FE"  # porcentaje en barra de progreso
 })
 
