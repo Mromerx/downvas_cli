@@ -149,7 +149,7 @@ def handle_change_course(api_client: CanvasAPIClient) -> Tuple[Optional[int], Op
         try:
             with console.status("[success]Validando curso...[/]"):
                 cname = api_client.fetch_course_name(cid)
-            with console.status(f"[success]Cargando estructura de '{cname}'...[/]"):
+            with console.status(f"[success]Cargando datos del curso '{cname}'...[/]"):
                 new_tree = api_client.fetch_course_tree(cid)
                 new_rich_tree, new_map = build_rich_tree(new_tree)
             console.print(f"[success]Cambiado a: {new_tree.course.name}[/]")
@@ -193,3 +193,43 @@ def handle_change_token(settings: Settings) -> Tuple[Settings, CanvasAPIClient, 
         except Exception as e:
             console.print(f"[error]Error al actualizar token: {e}[/]")
             return settings, CanvasAPIClient(settings.canvas_url, settings.api_token), DownloaderService(settings.canvas_url, settings.api_token)
+
+def handle_download_by_section(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
+    sections: Dict[str, List[CanvasFile]] = {}
+    
+    for file in course_tree.files.values():
+        if file.module_name:
+            sections.setdefault(file.module_name, []).append(file)
+            
+    if not sections:
+        for folder in course_tree.folders.values():
+            folder_files = course_tree.folder_files_map.get(folder.id, [])
+            if folder_files:
+                sections[folder.name] = folder_files
+                
+    if not sections:
+        console.print("[secondary]No se encontraron secciones en el curso.[/]")
+        return
+        
+    section_names = list(sections.keys())
+    console.print("\n[primary]Secciones disponibles:[/]")
+    for idx, name in enumerate(section_names, start=1):
+        console.print(f"  {idx}. {name} [muted]({len(sections[name])} archivos)[/]")
+        
+    choice = Prompt.ask("\nSeleccione el numero de la seccion (Enter para cancelar)").strip()
+    if not choice:
+        return
+        
+    if choice.isdigit():
+        c_idx = int(choice) - 1
+        if 0 <= c_idx < len(section_names):
+            selected_name = section_names[c_idx]
+            files_to_download = sections[selected_name]
+            
+            if Confirm.ask(f"[primary]Descargar {len(files_to_download)} archivos de la seccion '{selected_name}'?[/]", default=True):
+                jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in files_to_download]
+                downloader.download_jobs(jobs, from_modules=True)
+        else:
+            console.print("[error]Opcion invalida.[/]")
+    else:
+        console.print("[error]Entrada invalida.[/]")

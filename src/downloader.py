@@ -102,7 +102,7 @@ class DownloaderService:
     def __init__(self, base_url: str, token: str):
         self.downloader = FileDownloader(base_url, token)
 
-    def download_jobs(self, jobs: List[DownloadJob]) -> DownloadSummary:
+    def download_jobs(self, jobs: List[DownloadJob], from_modules: bool = False) -> DownloadSummary:
         from rich.table import Table
         from rich.panel import Panel
         from src.core import human_readable_size
@@ -112,18 +112,26 @@ class DownloaderService:
         if not jobs:
             return summary
 
-        progress = Progress(
-            TextColumn("[primary]{task.description}", justify="right"),
-            BarColumn(bar_width=40),
-            "[progress.percentage]{task.percentage:>3.1f}%",
-            "•",
-            DownloadColumn(),
-            "•",
-            TransferSpeedColumn(),
-            "•",
-            TimeRemainingColumn(),
-            console=console,
-        )
+        if from_modules:
+            progress = Progress(
+                TextColumn("[primary]{task.description}", justify="right"),
+                BarColumn(bar_width=40),
+                "[progress.percentage]{task.percentage:>3.1f}%",
+                console=console,
+            )
+        else:
+            progress = Progress(
+                TextColumn("[primary]{task.description}", justify="right"),
+                BarColumn(bar_width=40),
+                "[progress.percentage]{task.percentage:>3.1f}%",
+                "•",
+                DownloadColumn(),
+                "•",
+                TransferSpeedColumn(),
+                "•",
+                TimeRemainingColumn(),
+                console=console,
+            )
 
         start_time = time.time()
         skipped_jobs = []
@@ -176,28 +184,19 @@ class DownloaderService:
 
         summary.total_duration = max(0.1, time.time() - start_time)
 
-        console.print("\n" + "=" * 52)
-        console.print("[success]RESUMEN DE DESCARGA[/]")
-        console.print("=" * 52)
+        console.print("[secondary]─[/] [primary]RESUMEN DE DESCARGA[/] [secondary]───────────────────────────[/]")
 
         if failed_jobs or skipped_jobs:
-            table = Table(title="Detalle de Operaciones", show_lines=True)
-            table.add_column("Archivo", style="primary")
-            table.add_column("Estado", justify="center")
-            table.add_column("Detalle/Error", style="muted")
-            
+            detalle_lines = []
             for job in downloaded_jobs[:10]:
-                table.add_row(job.display_name, "[success]Descargado[/]", "Completado con exito")
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [success]: Descargado[/]")
             if len(downloaded_jobs) > 10:
-                table.add_row(f"... y {len(downloaded_jobs) - 10} archivos mas", "[success]Descargados[/]", "-")
-
+                detalle_lines.append(f"  [primary]... y {len(downloaded_jobs) - 10} archivos mas[/] [success]: Descargados[/]")
             for job in skipped_jobs:
-                table.add_row(job.display_name, "[secondary]Omitido[/]", "Archivo ya existente localmente")
-
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [secondary]: Omitido (ya existente)[/]")
             for job, err in failed_jobs:
-                table.add_row(job.display_name, "[error]Fallido[/]", err)
-                
-            console.print(table)
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [error]: Fallido: {err}[/]")
+            console.print(Panel("\n".join(detalle_lines), title="Detalle de Operaciones", expand=False))
             console.print()
 
         total_files = len(jobs)
@@ -215,11 +214,14 @@ class DownloaderService:
             f"- [primary]Archivos procesados:[/] {total_files}\n"
             f"  - [success]Descargados con exito:[/] {summary.successful}\n"
             f"  - [secondary]Omitidos (ya existentes):[/] {summary.skipped}\n"
-            f"  - [error]Fallidos con error:[/] {summary.failed}\n"
-            f"- [primary]Total descargado:[/] {size_str}\n"
-            f"- [primary]Tiempo total:[/] {duration_str}\n"
-            f"- [primary]Velocidad media:[/] {speed_str}"
+            f"  - [error]Fallidos con error:[/] {summary.failed}"
         )
+        if not from_modules:
+            metrics_content += (
+                f"\n- [primary]Total descargado:[/] {size_str}\n"
+                f"- [primary]Tiempo total:[/] {duration_str}\n"
+                f"- [primary]Velocidad media:[/] {speed_str}"
+            )
         
         console.print(Panel(metrics_content, title="[success]Métricas de Descarga[/]", expand=False, border_style="success"))
         console.print()

@@ -25,7 +25,8 @@ from src.cli import (
     handle_refresh,
     handle_change_course,
     handle_change_url,
-    handle_change_token
+    handle_change_token,
+    handle_download_by_section
 )
 
 def main() -> None:
@@ -79,7 +80,7 @@ def main() -> None:
         try:
             with console.status("[success]Validando curso...[/]"):
                 cname = api_client.fetch_course_name(cid)
-            with console.status(f"[success]Cargando estructura de '{cname}'...[/]"):
+            with console.status(f"[success]Cargando datos del curso '{cname}'...[/]"):
                 course_tree = api_client.fetch_course_tree(cid)
                 rich_tree, index_map = build_rich_tree(course_tree)
             course_id = cid
@@ -93,46 +94,49 @@ def main() -> None:
         console.print("[secondary]─[/] [primary]MENU[/] [secondary]─────────────────────────────────────────[/]")
         menu_options = [
             ("1",  "Ver listado del curso"),
-            ("2",  "Descargar un archivo"),
-            ("3",  "Descargar varios archivos"),
-            ("4",  "Descargar archivos por extension (ej: .pdf)"),
-            ("5",  "Descargar todos los archivos del curso"),
-            ("6",  "Actualizar informacion del curso"),
-            ("7",  "Cambiar de curso"),
-            ("8",  "Cambiar URL de Canvas"),
-            ("9",  "Cambiar token de acceso"),
-            ("10", "Salir"),
+            ("2",  "Actualizar informacion del curso"),
+            ("3",  "Descargar un archivo"),
+            ("4",  "Descargar varios archivos"),
+            ("5",  "Descargar archivos por extension (ej: .pdf)"),
+            ("6",  "Descargar todos los archivos del curso"),
+            ("7",  "Descargar por seccion"),
+            ("8",  "Cambiar de curso"),
+            ("9",  "Cambiar URL de Canvas"),
+            ("10", "Cambiar token de acceso"),
+            ("11", "Salir"),
         ]
         for num, desc in menu_options:
             console.print(f" [primary]\\[{num}][/] {desc}")
         console.print()
         while True:
             option = Prompt.ask("Opcion").strip()
-            if option in [str(i) for i in range(1, 11)]:
+            if option in [str(i) for i in range(1, 12)]:
                 break
             console.print("[error]Opcion invalida.[/]")
         
         if option == "1":
             handle_view_tree(rich_tree)
         elif option == "2":
-            handle_download_single(course_tree, settings, downloader, index_map)
-        elif option == "3":
-            handle_download_multi(course_tree, settings, downloader, index_map)
-        elif option == "4":
-            handle_download_by_ext(course_tree, settings, downloader)
-        elif option == "5":
-            handle_download_all(course_tree, settings, downloader)
-        elif option == "6":
             course_tree, rich_tree, index_map = handle_refresh(course_id, api_client)
+        elif option == "3":
+            handle_download_single(course_tree, settings, downloader, index_map)
+        elif option == "4":
+            handle_download_multi(course_tree, settings, downloader, index_map)
+        elif option == "5":
+            handle_download_by_ext(course_tree, settings, downloader)
+        elif option == "6":
+            handle_download_all(course_tree, settings, downloader)
         elif option == "7":
+            handle_download_by_section(course_tree, settings, downloader)
+        elif option == "8":
             new_cid, new_ctree, new_rtree, new_imap = handle_change_course(api_client)
             if new_cid is not None:
                 course_id, course_tree, rich_tree, index_map = new_cid, new_ctree, new_rtree, new_imap
-        elif option == "8":
-            settings, api_client, downloader = handle_change_url(settings)
         elif option == "9":
-            settings, api_client, downloader = handle_change_token(settings)
+            settings, api_client, downloader = handle_change_url(settings)
         elif option == "10":
+            settings, api_client, downloader = handle_change_token(settings)
+        elif option == "11":
             console.print("[success]Saliendo...[/]")
             break
 
