@@ -131,6 +131,9 @@ class DownloaderService:
         downloaded_jobs = []
 
         with progress:
+            from concurrent.futures import as_completed
+            jobs_to_download = []
+            
             for job in jobs:
                 if job.destination.exists():
                     local_size = os.path.getsize(job.destination)
@@ -140,27 +143,36 @@ class DownloaderService:
                         skipped_jobs.append(job)
                         continue
 
-                task_id = progress.add_task(job.display_name, total=job.expected_size or 0)
-                
-                def update_progress(chunk_size: int):
-                    progress.update(task_id, advance=chunk_size)
+                task_id = progress.add_task(job.display_name, total=job.expected_size or 0, start=False)
+                jobs_to_download.append((job, task_id))
 
-                try:
-                    progress.start_task(task_id)
-                    bytes_dl = self.downloader.download_file(job, progress_callback=update_progress)
-                    progress.update(task_id, completed=job.expected_size or bytes_dl)
-                    progress.console.print(f"  [success][OK][/] {job.display_name} [muted]({human_readable_size(bytes_dl)})[/]")
-                    summary.successful += 1
-                    summary.total_bytes_downloaded += bytes_dl
-                    downloaded_jobs.append(job)
-                except Exception as e:
-                    err_msg = str(e)
-                    progress.console.print(f"  [error][!][/] {job.display_name} [error][Fallido: {err_msg}][/]")
-                    summary.failed += 1
-                    summary.errors.append(err_msg)
-                    failed_jobs.append((job, err_msg))
-                finally:
-                    progress.remove_task(task_id)
+            def _worker(w_job, w_task_id):
+                def update_progress(chunk_size: int):
+                    progress.update(w_task_id, advance=chunk_size)
+
+                progress.start_task(w_task_id)
+                w_bytes = self.downloader.download_file(w_job, progress_callback=update_progress)
+                progress.update(w_task_id, completed=w_job.expected_size or w_bytes)
+                return w_bytes
+
+            with ThreadPoolExecutor(max_workers=5) as pool:
+                futures = {pool.submit(_worker, j, tid): (j, tid) for j, tid in jobs_to_download}
+                for future in as_completed(futures):
+                    j, tid = futures[future]
+                    try:
+                        bytes_dl = future.result()
+                        progress.console.print(f"  [success][OK][/] {j.display_name} [muted]({human_readable_size(bytes_dl)})[/]")
+                        summary.successful += 1
+                        summary.total_bytes_downloaded += bytes_dl
+                        downloaded_jobs.append(j)
+                    except Exception as e:
+                        err_msg = str(e)
+                        progress.console.print(f"  [error][!][/] {j.display_name} [error][Fallido: {err_msg}][/]")
+                        summary.failed += 1
+                        summary.errors.append(err_msg)
+                        failed_jobs.append((j, err_msg))
+                    finally:
+                        progress.remove_task(tid)
 
         summary.total_duration = max(0.1, time.time() - start_time)
 
@@ -200,13 +212,13 @@ class DownloaderService:
         duration_str = f"{mins}m {secs:.1f}s" if mins > 0 else f"{secs:.1f}s"
         
         metrics_content = (
-            f"- [bold]Archivos procesados:[/] {total_files}\n"
+            f"- [primary]Archivos procesados:[/] {total_files}\n"
             f"  - [success]Descargados con exito:[/] {summary.successful}\n"
             f"  - [secondary]Omitidos (ya existentes):[/] {summary.skipped}\n"
             f"  - [error]Fallidos con error:[/] {summary.failed}\n"
-            f"- [bold]Total descargado:[/] {size_str}\n"
-            f"- [bold]Tiempo total:[/] {duration_str}\n"
-            f"- [bold]Velocidad media:[/] {speed_str}"
+            f"- [primary]Total descargado:[/] {size_str}\n"
+            f"- [primary]Tiempo total:[/] {duration_str}\n"
+            f"- [primary]Velocidad media:[/] {speed_str}"
         )
         
         console.print(Panel(metrics_content, title="[success]Métricas de Descarga[/]", expand=False, border_style="success"))

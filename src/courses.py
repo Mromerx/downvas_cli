@@ -321,18 +321,21 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         counter[0] += 1
         idx = counter[0]
         index_map[idx] = file.id
-        size_str = human_readable_size(file.size)
+        size_display = ""
+        if file.module_name is None:
+            size_str = human_readable_size(file.size)
+            size_display = f" [muted]({size_str})[/]"
         flags = ""
         if file.locked: flags = " [secondary][Bloqueado][/]"
         elif file.hidden: flags = " [secondary][Oculto][/]"
-        node.add(f"[{idx}] [primary]{file.display_name}[/] [muted]({size_str})[/]{flags}")
+        node.add(f"[{idx}] [primary]{file.display_name}[/]{size_display}{flags}")
 
     def _populate_folder(fid: int, node: Tree):
         subids = course_tree.subfolders_map.get(fid, [])
         subs = [course_tree.folders[sid] for sid in subids if sid in course_tree.folders]
         subs.sort(key=lambda x: x.name.lower())
         for s in subs:
-            fnode = node.add(f"[primary][Carpeta] {s.name}[/]")
+            fnode = node.add(f"[module][Carpeta] {s.name}[/]")
             _populate_folder(s.id, fnode)
             
         fs = course_tree.folder_files_map.get(fid, [])
@@ -354,7 +357,7 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         else:
             for fid, f in course_tree.folders.items():
                 if f.parent_folder_id is None:
-                    fnode = root_node.add(f"[primary][Carpeta] {f.name}[/]")
+                    fnode = root_node.add(f"[module][Carpeta] {f.name}[/]")
                     _populate_folder(fid, fnode)
                     
     else:

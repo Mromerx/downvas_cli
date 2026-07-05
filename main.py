@@ -8,8 +8,6 @@ import sys
 from typing import Dict, Optional, List
 
 from rich.prompt import Confirm, Prompt
-from rich.rule import Rule
-
 from src.theme import console
 
 from src.core import (
@@ -131,7 +129,7 @@ def main() -> None:
             api_client.verify_authentication()
     except CanvasAuthError:
         console.print("[error]Token invalido o expirado.[/]")
-        if Confirm.ask("Desea reconfigurar?", default=True):
+        if Confirm.ask("[primary]Desea reconfigurar?[/]", default=True):
             settings = run_config_wizard()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
@@ -153,7 +151,7 @@ def main() -> None:
         domain = extract_domain(cid_str)
         if domain and domain.rstrip("/") != settings.canvas_url.rstrip("/"):
             console.print(f"[secondary]El dominio ingresado ({domain}) no coincide con el configurado ({settings.canvas_url}).[/]")
-            if Confirm.ask("Desea actualizar la URL?", default=True):
+            if Confirm.ask("[primary]Desea actualizar la URL?[/]", default=True):
                 settings = run_config_wizard()
                 api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
                 downloader = DownloaderService(settings.canvas_url, settings.api_token)
@@ -172,7 +170,7 @@ def main() -> None:
             console.print(f"[error]Error al cargar curso: {e}[/]")
             
     while True:
-        console.print(Rule("[primary]MENU[/]"))
+        console.print("[secondary]─[/] [primary]MENU[/] [secondary]─────────────────────────────────────────[/]")
         menu_options = [
             ("1",  "Ver listado del curso"),
             ("2",  "Descargar un archivo"),
@@ -218,7 +216,7 @@ def main() -> None:
                     console.print(f"[success]Agregado: {file.display_name}[/]")
                 else:
                     console.print("[error]No encontrado.[/]")
-            if queue and Confirm.ask(f"Confirmar descarga de {len(queue)} archivos?", default=True):
+            if queue and Confirm.ask(f"[primary]Confirmar descarga de {len(queue)} archivos?[/]", default=True):
                 jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in queue]
                 downloader.download_jobs(jobs)
                 
@@ -226,7 +224,7 @@ def main() -> None:
             ext = Prompt.ask("\nExtension (ej: .pdf)").strip()
             if ext:
                 fs = course_tree.get_files_by_extension(ext)
-                if fs and Confirm.ask(f"Descargar {len(fs)} archivos?", default=True):
+                if fs and Confirm.ask(f"[primary]Descargar {len(fs)} archivos?[/]", default=True):
                     jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in fs]
                     downloader.download_jobs(jobs)
                 elif not fs:
@@ -234,7 +232,7 @@ def main() -> None:
                     
         elif option == "5":
             fs = course_tree.get_all_files()
-            if fs and Confirm.ask(f"Descargar todo ({len(fs)} archivos)?", default=True):
+            if fs and Confirm.ask(f"[primary]Descargar todo ({len(fs)} archivos)?[/]", default=True):
                 jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id) for f in fs]
                 downloader.download_jobs(jobs)
                 
