@@ -4,8 +4,8 @@ DownVas es una herramienta de interfaz de línea de comandos (CLI) escrita en Py
 
 ## Características Principales
 
-- **Autenticacion mediante Token**: Configura tu URL de Canvas y tu token de acceso (API Token) de manera segura y sencilla.
-- **Exploracion Jerarquica**: Visualiza todo el contenido de tu curso en una estructura de arbol (Carpetas, Modulos y Archivos) con colores distintivos por tipo de archivo, todo desde la terminal.
+- **Autenticación mediante Token**: Configura tu URL de Canvas y tu token de acceso (API Token) de manera segura y sencilla.
+- **Exploración Jerárquica**: Visualiza todo el contenido de tu curso en una estructura de árbol (Carpetas, Módulos y Archivos) con colores distintivos por tipo de archivo, todo desde la terminal.
 - **Multiples Opciones de Descarga**:
   - Descargar un archivo especifico (por su ID, nombre o indice en el arbol).
   - Descargar una cola de varios archivos seleccionados manualmente.
@@ -24,6 +24,7 @@ DownVas es una herramienta de interfaz de línea de comandos (CLI) escrita en Py
   - `requests`
   - `rich`
   - `pydantic`
+  - `python-dotenv`
 
 ## Instalación
 
@@ -59,19 +60,21 @@ Una vez configurado y tras ingresar el ID de un curso (o su URL completa), se te
 1. **Ver listado del curso**: Imprime la estructura jerárquica de archivos, carpetas y módulos.
 2. **Descargar un archivo**: Selecciona y descarga un único archivo.
 3. **Descargar varios archivos**: Permite agregar archivos a una cola y descargarlos en lote.
-4. **Descargar todos los archivos de una extensión**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
+4. **Descargar archivos por extensión (ej: .pdf)**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
 5. **Descargar todos los archivos del curso**: Descarga el curso completo manteniendo la jerarquía de carpetas.
 6. **Actualizar información del curso**: Vuelve a cargar el árbol de archivos desde el servidor.
 7. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
-8. **Cambiar URL de Canvas / 9. Cambiar token**: Opciones de reconfiguración.
+8. **Cambiar URL de Canvas**: Opción de reconfiguración.
+9. **Cambiar token de acceso**: Opción de reconfiguración.
 10. **Salir**
 
 ## Estructura de Directorios
 
-- `main.py`: Punto de entrada de la aplicacion y controlador del menu interactivo.
+- `main.py`: Punto de entrada de la aplicación y controlador del menú interactivo.
 - `src/`
-  - `core.py`: Definicion de errores comunes, utilidades (ej. validacion de URLs) y carga de configuraciones (Settings).
-  - `courses.py`: Cliente de la API de Canvas, manejo de peticiones paginadas y generacion del arbol jerarquico.
+  - `cli.py`: Handlers de cada opción del menú (asistente de configuración, descargas, actualización, cambio de curso/URL/token).
+  - `core.py`: Definición de errores comunes, utilidades (ej. validación de URLs) y carga de configuraciones (Settings).
+  - `courses.py`: Cliente de la API de Canvas, manejo de peticiones paginadas y generación del árbol jerárquico.
   - `downloader.py`: Servicio dedicado a la descarga de archivos en fragmentos, manejo de archivos `.part` e interfaz de la barra de progreso.
-  - `theme.py`: Definicion centralizada del tema visual (colores y estilos) de la interfaz de terminal.
+  - `theme.py`: Definición centralizada del tema visual (colores y estilos) de la interfaz de terminal.
 - `.env`: (Generado automaticamente) Archivo de variables de entorno para almacenar credenciales.
