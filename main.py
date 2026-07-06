@@ -24,8 +24,6 @@ from src.cli import (
     handle_download_all,
     handle_refresh,
     handle_change_course,
-    handle_change_url,
-    handle_change_token,
     handle_download_by_section
 )
 
@@ -100,17 +98,16 @@ def main() -> None:
             ("5",  "Descargar archivos por extension (ej: .pdf)"),
             ("6",  "Descargar todos los archivos del curso"),
             ("7",  "Descargar por seccion"),
-            ("8",  "Cambiar de curso"),
-            ("9",  "Cambiar URL de Canvas"),
-            ("10", "Cambiar token de acceso"),
-            ("11", "Salir"),
+            ("8",  "Reasignar credenciales"),
+            ("9",  "Cambiar de curso"),
+            ("10", "Salir"),
         ]
         for num, desc in menu_options:
             console.print(f" [primary]\\[{num}][/] {desc}")
         console.print()
         while True:
             option = Prompt.ask("Opcion").strip()
-            if option in [str(i) for i in range(1, 12)]:
+            if option in [str(i) for i in range(1, 11)]:
                 break
             console.print("[error]Opcion invalida.[/]")
         
@@ -129,14 +126,14 @@ def main() -> None:
         elif option == "7":
             handle_download_by_section(course_tree, settings, downloader)
         elif option == "8":
+            settings = run_config_wizard()
+            api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
+            downloader = DownloaderService(settings.canvas_url, settings.api_token)
+        elif option == "9":
             new_cid, new_ctree, new_rtree, new_imap = handle_change_course(api_client)
             if new_cid is not None:
                 course_id, course_tree, rich_tree, index_map = new_cid, new_ctree, new_rtree, new_imap
-        elif option == "9":
-            settings, api_client, downloader = handle_change_url(settings)
         elif option == "10":
-            settings, api_client, downloader = handle_change_token(settings)
-        elif option == "11":
             console.print("[success]Saliendo...[/]")
             break
 

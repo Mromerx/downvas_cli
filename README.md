@@ -66,10 +66,9 @@ Una vez configurado y tras ingresar el ID de un curso (o su URL completa), se te
 5. **Descargar archivos por extensión (ej: .pdf)**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
 6. **Descargar todos los archivos del curso**: Descarga el curso completo manteniendo la jerarquía de carpetas.
 7. **Descargar por sección**: Descarga todos los archivos de un módulo o carpeta específica.
-8. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
-9. **Cambiar URL de Canvas**: Opción de reconfiguración.
-10. **Cambiar token de acceso**: Opción de reconfiguración.
-11. **Salir**
+8. **Reasignar credenciales**: Opción de reconfiguración.
+9. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
+10. **Salir**
 
 ## Estructura de Directorios
 

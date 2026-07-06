@@ -158,42 +158,6 @@ def handle_change_course(api_client: CanvasAPIClient) -> Tuple[Optional[int], Op
             console.print(f"[error]Error: {e}[/]")
     return None, None, None, {}
 
-def handle_change_url(settings: Settings) -> Tuple[Settings, CanvasAPIClient, DownloaderService]:
-    console.print(f"\nURL actual: [secondary]{settings.canvas_url}[/]")
-    new_url = Prompt.ask("Nueva URL de Canvas (ej: https://canvas.instructure.com)").strip()
-    if not new_url:
-        console.print("[error]La URL no puede estar vacia. Operacion cancelada.[/]")
-        return settings, CanvasAPIClient(settings.canvas_url, settings.api_token), DownloaderService(settings.canvas_url, settings.api_token)
-    else:
-        try:
-            settings.update_url(new_url)
-            api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
-            downloader = DownloaderService(settings.canvas_url, settings.api_token)
-            console.print(f"[success]URL actualizada a: {settings.canvas_url}[/]")
-            console.print("[muted]Los servicios han sido reiniciados con la nueva URL.[/]")
-            return settings, api_client, downloader
-        except Exception as e:
-            console.print(f"[error]Error al actualizar URL: {e}[/]")
-            return settings, CanvasAPIClient(settings.canvas_url, settings.api_token), DownloaderService(settings.canvas_url, settings.api_token)
-
-def handle_change_token(settings: Settings) -> Tuple[Settings, CanvasAPIClient, DownloaderService]:
-    console.print("\nToken actual: [muted](oculto por seguridad)[/]")
-    new_token = Prompt.ask("Nuevo token de acceso de Canvas").strip()
-    if not new_token:
-        console.print("[error]El token no puede estar vacio. Operacion cancelada.[/]")
-        return settings, CanvasAPIClient(settings.canvas_url, settings.api_token), DownloaderService(settings.canvas_url, settings.api_token)
-    else:
-        try:
-            settings.update_token(new_token)
-            api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
-            downloader = DownloaderService(settings.canvas_url, settings.api_token)
-            console.print("[success]Token actualizado correctamente.[/]")
-            console.print("[muted]Los servicios han sido reiniciados con el nuevo token.[/]")
-            return settings, api_client, downloader
-        except Exception as e:
-            console.print(f"[error]Error al actualizar token: {e}[/]")
-            return settings, CanvasAPIClient(settings.canvas_url, settings.api_token), DownloaderService(settings.canvas_url, settings.api_token)
-
 def handle_download_by_section(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
     sections: Dict[str, List[CanvasFile]] = {}
     
