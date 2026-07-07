@@ -28,6 +28,7 @@ from src.cli import (
 )
 
 def main() -> None:
+    console.clear()
     settings = Settings.load()
     ascii_art = r"""[primary] ___               __   __       
 |   \ _____ __ ___ \ \ / /_ _ ___
@@ -35,9 +36,10 @@ def main() -> None:
 |___/\___/\_/\_/|_||_\_/\__,_/__/[/]
 """
     console.print(ascii_art)
-    console.print("DownVas - Canvas Downloader", style="secondary")    
+    console.print("   DownVas - Canvas Downloader", style="secondary")    
     if not settings.is_configured:
         settings = run_config_wizard()
+        console.clear()
         
     api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
     downloader = DownloaderService(settings.canvas_url, settings.api_token)
@@ -61,7 +63,12 @@ def main() -> None:
     rich_tree = None
     
     while course_tree is None:
-        cid_str = Prompt.ask("\nIngrese el ID del curso o URL completa").strip()
+        cid_str = Prompt.ask("\nIngrese el ID del curso o URL completa\n  o 'credenciales' para reconfigurar").strip()
+        if cid_str.lower() in ("credenciales", "config", "0"):
+            settings = run_config_wizard()
+            api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
+            downloader = DownloaderService(settings.canvas_url, settings.api_token)
+            continue
         cid = extract_course_id(cid_str)
         if cid is None:
             console.print("[error]ID invalido.[/]")
@@ -126,7 +133,9 @@ def main() -> None:
         elif option == "7":
             handle_download_by_section(course_tree, settings, downloader)
         elif option == "8":
+            console.clear()
             settings = run_config_wizard()
+            console.clear()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
         elif option == "9":
