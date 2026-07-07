@@ -4,9 +4,7 @@ Core module: Configuration, Exceptions, and Utilities.
 import os
 from pathlib import Path
 from pydantic import BaseModel, Field
-from dotenv import load_dotenv
 
-load_dotenv()
 
 # --- Exceptions ---
 class DownVasError(Exception):

@@ -2,6 +2,10 @@
 import sys
 from typing import Dict, Optional
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from rich.prompt import Confirm, Prompt
 from src.theme import console
 
@@ -66,6 +70,7 @@ def main() -> None:
         cid_str = Prompt.ask("\nIngrese el ID del curso o URL completa\n  o 'credenciales' para reconfigurar").strip()
         if cid_str.lower() in ("credenciales", "config", "0"):
             settings = run_config_wizard()
+            console.clear()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
             continue

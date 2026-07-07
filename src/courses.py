@@ -42,6 +42,7 @@ class CanvasFile:
     url: Optional[str]
     locked: bool = False
     hidden: bool = False
+    module_id: Optional[int] = None  # ID único del módulo Canvas para evitar colisiones de ruta
 
     @property
     def extension(self) -> str:
@@ -102,10 +103,14 @@ class CourseTree:
         course_folder = clean_name(self.course.name)
         file_name = clean_name(file.display_name)
         
+        if file.module_name and file.module_id:
+            d = clean_name(file.module_name)
+            return base_dir / course_folder / f"{d} ({file.module_id})" / file_name
+
         if file.module_name:
-            module_folder = clean_name(file.module_name)
-            return base_dir / course_folder / module_folder / file_name
-            
+            # Fallback sin ID (no debería ocurrir en condiciones normales)
+            return base_dir / course_folder / clean_name(file.module_name) / file_name
+
         if file.folder_id and self.folders:
             path_parts = []
             current_folder_id = file.folder_id
@@ -113,11 +118,12 @@ class CourseTree:
                 folder = self.folders.get(current_folder_id)
                 if not folder:
                     break
-                path_parts.insert(0, clean_name(folder.name))
+                d = clean_name(folder.name)
+                path_parts.insert(0, f"{d} ({folder.id})")
                 current_folder_id = folder.parent_folder_id
             if path_parts:
                 return base_dir / course_folder / Path(*path_parts) / file_name
-                
+
         return base_dir / course_folder / file_name
 
     def find_file_by_name(self, name: str) -> List[CanvasFile]:
@@ -259,6 +265,7 @@ class CanvasAPIClient:
                         folder_id=None,
                         display_name=item.get("title") or "archivo",
                         module_name=mname,
+                        module_id=module.get("id"),
                         size=content.get("size"),
                         url=content.get("url") or item.get("url"),
                         locked=content.get("locked_for_user", False),
