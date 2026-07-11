@@ -35,11 +35,15 @@ def run_config_wizard() -> Settings:
         else:
             break
     
-    current_locale = settings.locale
+    current_locale = settings.locale if settings.locale in ("en", "es") else "en"
     locale_prompt = f"{_('Idioma de la interfaz')} [muted]({_('Opciones validas')}: en, es)[/]"
-    new_locale = Prompt.ask(locale_prompt, default=current_locale).strip()
+    while True:
+        new_locale = Prompt.ask(locale_prompt, default=current_locale).strip()
+        if new_locale in ("en", "es"):
+            break
+        console.print(f"[error]{_('Opcion invalida.')} {_('Opciones validas')}: en, es[/]")
     
-    lang = new_locale.split("_")[0].lower()
+    lang = new_locale
     from src.core import _DEFAULT_FOLDER
     if os.getenv("CANVAS_DOWNLOAD_DIR"):
         default_dir_str = str(settings.download_dir)

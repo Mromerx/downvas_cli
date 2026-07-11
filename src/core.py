@@ -3,7 +3,7 @@ Core module: Configuration, Exceptions, and Utilities.
 """
 import os
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from src.i18n import _
 
 
@@ -39,7 +39,7 @@ _DEFAULT_FOLDER: dict[str, str] = {
 def _default_download_dir() -> Path:
     """Carpeta de descarga por defecto según CANVAS_LOCALE."""
     lang = os.getenv("CANVAS_LOCALE", "en").split("_")[0].lower()
-    folder = _DEFAULT_FOLDER.get(lang, "Descargas")
+    folder = _DEFAULT_FOLDER.get(lang, "Downloads")
     return Path.cwd() / folder
 
 class Settings(BaseModel):
@@ -47,6 +47,12 @@ class Settings(BaseModel):
     api_token: str = Field(default="")
     download_dir: Path = Field(default_factory=_default_download_dir)
     locale: str = Field(default="en")
+
+    @field_validator("locale")
+    @classmethod
+    def validate_locale(cls, v: str) -> str:
+        v = v.strip().lower()
+        return v if v in ("en", "es") else "en"
 
     @property
     def is_configured(self) -> bool:

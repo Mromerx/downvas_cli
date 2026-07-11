@@ -67,7 +67,12 @@ def setup_i18n(locale_name: Optional[str] = None) -> None:
         with open(mo_path, "rb") as f:
             _TRANSLATIONS = gettext.GNUTranslations(f)
     else:
-        _TRANSLATIONS = gettext.NullTranslations()
+        en_path = _LOCALE_DIR / "en" / "LC_MESSAGES" / "messages.mo"
+        if en_path.exists():
+            with open(en_path, "rb") as f:
+                _TRANSLATIONS = gettext.GNUTranslations(f)
+        else:
+            _TRANSLATIONS = gettext.NullTranslations()
 
 
 def _(message: str) -> str:
