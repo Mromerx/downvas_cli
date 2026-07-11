@@ -17,7 +17,8 @@ from src.core import (
     CanvasAuthError,
     CourseNotFoundError,
     extract_course_id,
-    extract_domain
+    extract_domain,
+    clear_screen,
 )
 from src.courses import CanvasAPIClient, CourseTree, build_rich_tree
 from src.downloader import DownloaderService
@@ -36,7 +37,7 @@ from src.cli import (
 )
 
 def main() -> None:
-    console.clear()
+    clear_screen()
     settings = Settings.load()
 
     # Inicializar i18n antes de cualquier output
@@ -52,7 +53,7 @@ def main() -> None:
     if not settings.is_configured:
         settings = run_config_wizard()
         setup_i18n(settings.locale)
-        console.clear()
+        clear_screen()
         
     api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
     downloader = DownloaderService(settings.canvas_url, settings.api_token)
@@ -94,7 +95,7 @@ def main() -> None:
         ):
             settings = run_config_wizard()
             setup_i18n(settings.locale)
-            console.clear()
+            clear_screen()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
             try:
@@ -171,10 +172,10 @@ def main() -> None:
         elif option == "7":
             handle_download_by_section(course_tree, settings, downloader)
         elif option == "8":
-            console.clear()
+            clear_screen()
             settings = run_config_wizard()
             setup_i18n(settings.locale)
-            console.clear()
+            clear_screen()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
             try:

@@ -2,9 +2,14 @@
 Core module: Configuration, Exceptions, and Utilities.
 """
 import os
+import platform
 from pathlib import Path
 from pydantic import BaseModel, Field, field_validator
 from src.i18n import _
+
+
+def clear_screen() -> None:
+    os.system('cls' if platform.system() == 'Windows' else 'clear')
 
 
 # --- Exceptions ---
