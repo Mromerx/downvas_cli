@@ -4,6 +4,7 @@ Core module: Configuration, Exceptions, and Utilities.
 import os
 from pathlib import Path
 from pydantic import BaseModel, Field
+from src.i18n import _
 
 
 # --- Exceptions ---
@@ -31,10 +32,21 @@ class ConnectionError(DownVasError):
     pass
 
 # --- Configuration ---
+_DEFAULT_FOLDER: dict[str, str] = {
+    "en": "Downloads",
+}
+
+def _default_download_dir() -> Path:
+    """Carpeta de descarga por defecto según CANVAS_LOCALE."""
+    lang = os.getenv("CANVAS_LOCALE", "en").split("_")[0].lower()
+    folder = _DEFAULT_FOLDER.get(lang, "Descargas")
+    return Path.cwd() / folder
+
 class Settings(BaseModel):
     canvas_url: str = Field(default="")
     api_token: str = Field(default="")
-    download_dir: Path = Field(default_factory=lambda: Path.cwd() / "Descargas")
+    download_dir: Path = Field(default_factory=_default_download_dir)
+    locale: str = Field(default="en")
 
     @property
     def is_configured(self) -> bool:
@@ -44,9 +56,14 @@ class Settings(BaseModel):
     def load(cls) -> "Settings":
         url = os.getenv("CANVAS_URL", "")
         token = os.getenv("CANVAS_TOKEN", "")
+        locale = os.getenv("CANVAS_LOCALE", "en")
         dl_dir_str = os.getenv("CANVAS_DOWNLOAD_DIR")
-        dl_dir = Path(dl_dir_str) if dl_dir_str else Path.cwd() / "Descargas"
-        return cls(canvas_url=url, api_token=token, download_dir=dl_dir)
+        if dl_dir_str:
+            dl_dir = Path(dl_dir_str)
+        else:
+            lang = locale.split("_")[0].lower()
+            dl_dir = Path.cwd() / _DEFAULT_FOLDER.get(lang, "Descargas")
+        return cls(canvas_url=url, api_token=token, download_dir=dl_dir, locale=locale)
 
     def save(self) -> None:
         env_path = Path(".env")
@@ -64,25 +81,27 @@ class Settings(BaseModel):
         _update("CANVAS_URL", self.canvas_url)
         _update("CANVAS_TOKEN", self.api_token)
         _update("CANVAS_DOWNLOAD_DIR", str(self.download_dir))
+        _update("CANVAS_LOCALE", self.locale)
         env_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         
         os.environ["CANVAS_URL"] = self.canvas_url
         os.environ["CANVAS_TOKEN"] = self.api_token
         os.environ["CANVAS_DOWNLOAD_DIR"] = str(self.download_dir)
+        os.environ["CANVAS_LOCALE"] = self.locale
 
     def update_url(self, new_url: str) -> None:
         new_url = new_url.strip()
         if not new_url:
-            raise ConfigurationError("La URL de Canvas no puede estar vacia.")
+            raise ConfigurationError(_("La URL de Canvas no puede estar vacia."))
         if not new_url.startswith(("http://", "https://")):
-            raise ConfigurationError("La URL de Canvas debe comenzar con http:// o https://")
+            raise ConfigurationError(_("La URL de Canvas debe comenzar con http:// o https://"))
         self.canvas_url = new_url.rstrip("/")
         self.save()
 
     def update_token(self, new_token: str) -> None:
         new_token = new_token.strip()
         if not new_token:
-            raise ConfigurationError("El token de acceso no puede estar vacio.")
+            raise ConfigurationError(_("El token de acceso no puede estar vacio."))
         self.api_token = new_token
         self.save()
 

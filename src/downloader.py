@@ -7,6 +7,7 @@ from typing import List, Callable, Optional, Dict
 from pathlib import Path
 from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor
+from string import Template
 
 from src.theme import console
 from rich.progress import (
@@ -20,6 +21,7 @@ from rich.progress import (
 )
 
 from src.core import CanvasAPIError
+from src.i18n import _
 
 @dataclass
 class DownloadJob:
@@ -65,14 +67,14 @@ class FileDownloader:
             download_url = meta_json.get("url")
             
             if not download_url:
-                raise CanvasAPIError(f"No se encontro la URL de descarga para el archivo {job.display_name}")
+                raise CanvasAPIError(f"{_('No se encontro la URL de descarga para el archivo')} {job.display_name}")
 
             with requests.get(download_url, stream=True, allow_redirects=True, timeout=30) as r:
                 r.raise_for_status()
                 
                 content_type = r.headers.get("Content-Type", "")
                 if "application/json" in content_type and not job.display_name.lower().endswith(".json"):
-                    raise CanvasAPIError("La descarga devolvio JSON inesperado en lugar de binario.")
+                    raise CanvasAPIError(_("La descarga devolvio JSON inesperado en lugar de binario."))
                 
                 with open(part_file, "wb") as f:
                     for chunk in r.iter_content(chunk_size=8192):
@@ -97,7 +99,7 @@ class FileDownloader:
                     job.destination.unlink()
                 except OSError:
                     pass
-            raise CanvasAPIError(f"Error descargando {job.display_name}: {e}")
+            raise CanvasAPIError(f"{_('Error descargando')} {job.display_name}: {e}")
 
 class DownloaderService:
     def __init__(self, base_url: str, token: str):
@@ -155,7 +157,7 @@ class DownloaderService:
                 if job.destination.exists():
                     local_size = os.path.getsize(job.destination)
                     if job.expected_size is None or local_size == job.expected_size:
-                        progress.console.print(f"  [secondary][-][/] {job.display_name} [muted](Ya existe, omitido)[/]")
+                        progress.console.print(f"  [secondary][-][/] {job.display_name} [muted]({_('Ya existe, omitido')})[/]")
                         summary.skipped += 1
                         skipped_jobs.append(job)
                         continue
@@ -184,7 +186,7 @@ class DownloaderService:
                         downloaded_jobs.append(j)
                     except Exception as e:
                         err_msg = str(e)
-                        progress.console.print(f"  [error][!][/] {j.display_name} [error][Fallido: {err_msg}][/]")
+                        progress.console.print(f"  [error][!][/] {j.display_name} [error][{_('Fallido')}: {err_msg}][/]")
                         summary.failed += 1
                         summary.errors.append(err_msg)
                         failed_jobs.append((j, err_msg))
@@ -193,19 +195,19 @@ class DownloaderService:
 
         summary.total_duration = max(0.1, time.time() - start_time)
 
-        console.print("[secondary]─[/] [primary]RESUMEN DE DESCARGA[/] [secondary]───────────────────────────[/]")
+        console.print(f"[secondary]─[/] [primary]{_('RESUMEN DE DESCARGA')}[/] [secondary]───────────────────────────[/]")
 
         if failed_jobs or skipped_jobs:
             detalle_lines = []
             for job in downloaded_jobs[:10]:
-                detalle_lines.append(f"  [primary]{job.display_name}[/] [success]: Descargado[/]")
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [success]: {_('Descargado')}[/]")
             if len(downloaded_jobs) > 10:
-                detalle_lines.append(f"  [primary]... y {len(downloaded_jobs) - 10} archivos mas[/] [success]: Descargados[/]")
+                detalle_lines.append(f"  [primary]{Template(_('... y $n archivos mas')).safe_substitute(n=len(downloaded_jobs) - 10)}[/] [success]: {_('Descargado')}s[/]")
             for job in skipped_jobs:
-                detalle_lines.append(f"  [primary]{job.display_name}[/] [secondary]: Omitido (ya existente)[/]")
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [secondary]: {_('Omitido (ya existente)')}[/]")
             for job, err in failed_jobs:
-                detalle_lines.append(f"  [primary]{job.display_name}[/] [error]: Fallido: {err}[/]")
-            console.print(Panel("\n".join(detalle_lines), title="Detalle de Operaciones", expand=False))
+                detalle_lines.append(f"  [primary]{job.display_name}[/] [error]: {_('Fallido')}: {err}[/]")
+            console.print(Panel("\n".join(detalle_lines), title=_('Detalle de Operaciones'), expand=False))
             console.print()
 
         total_files = len(jobs)
@@ -220,19 +222,19 @@ class DownloaderService:
         duration_str = f"{mins}m {secs:.1f}s" if mins > 0 else f"{secs:.1f}s"
         
         metrics_content = (
-            f"- [primary]Archivos procesados:[/] {total_files}\n"
-            f"  - [success]Descargados con exito:[/] {summary.successful}\n"
-            f"  - [secondary]Omitidos (ya existentes):[/] {summary.skipped}\n"
-            f"  - [error]Fallidos con error:[/] {summary.failed}"
+            f"- [primary]{_('Archivos procesados:')}[/] {total_files}\n"
+            f"  - [success]{_('Descargados con exito:')}[/] {summary.successful}\n"
+            f"  - [secondary]{_('Omitidos (ya existentes):')}[/] {summary.skipped}\n"
+            f"  - [error]{_('Fallidos con error:')}[/] {summary.failed}"
         )
         if not from_modules:
             metrics_content += (
-                f"\n- [primary]Total descargado:[/] {size_str}\n"
-                f"- [primary]Tiempo total:[/] {duration_str}\n"
-                f"- [primary]Velocidad media:[/] {speed_str}"
+                f"\n- [primary]{_('Total descargado:')}[/] {size_str}\n"
+                f"- [primary]{_('Tiempo total:')}[/] {duration_str}\n"
+                f"- [primary]{_('Velocidad media:')}[/] {speed_str}"
             )
         
-        console.print(Panel(metrics_content, title="[success]Métricas de Descarga[/]", expand=False, border_style="success"))
+        console.print(Panel(metrics_content, title=f"[success]{_('Métricas de Descarga')}[/]", expand=False, border_style="success"))
         console.print()
 
         return summary

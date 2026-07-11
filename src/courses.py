@@ -18,6 +18,7 @@ from src.core import (
     ConnectionError as CanvasConnectionError,
     human_readable_size
 )
+from src.i18n import _
 
 @dataclass
 class CanvasCourse:
@@ -168,9 +169,9 @@ class CanvasAPIClient:
             if response.status_code == 200:
                 return response
             elif response.status_code == 401:
-                raise CanvasAuthError("Token de acceso invalido o expirado.", status_code=401)
+                raise CanvasAuthError(_("Token de acceso invalido o expirado."), status_code=401)
             elif response.status_code == 404:
-                raise CourseNotFoundError("El curso no fue encontrado.", status_code=404)
+                raise CourseNotFoundError(_("El curso no fue encontrado."), status_code=404)
             elif response.status_code in (403, 429):
                 err_msg = response.text.lower()
                 if "rate limit" in err_msg or response.status_code == 429:
@@ -178,17 +179,17 @@ class CanvasAPIClient:
                     response = self.session.request(method, url, **kwargs)
                     if response.status_code == 200:
                         return response
-                    raise RateLimitError("Limite de solicitudes alcanzado.", status_code=response.status_code)
-                raise CanvasAPIError(f"Acceso denegado ({response.status_code}): {response.text}", status_code=response.status_code)
+                    raise RateLimitError(_("Limite de solicitudes alcanzado."), status_code=response.status_code)
+                raise CanvasAPIError(f"{_('Acceso denegado')} ({response.status_code}): {response.text}", status_code=response.status_code)
             else:
-                raise CanvasAPIError(f"Error HTTP {response.status_code}", status_code=response.status_code)
+                raise CanvasAPIError(f"{_('Error HTTP')} {response.status_code}", status_code=response.status_code)
 
         except requests.exceptions.ConnectionError as e:
-            raise CanvasConnectionError(f"No se pudo establecer conexion: {e}")
+            raise CanvasConnectionError(f"{_('No se pudo establecer conexion')}: {e}")
         except requests.RequestException as e:
             if isinstance(e, CanvasAPIError):
                 raise
-            raise CanvasAPIError(f"Error de red inesperado: {e}")
+            raise CanvasAPIError(f"{_('Error de red inesperado')}: {e}")
 
     def verify_authentication(self) -> None:
         self._request("GET", f"{self.base_url}/api/v1/users/self")
@@ -245,15 +246,15 @@ class CanvasAPIClient:
     def fetch_course_tree(self, course_id: int) -> CourseTree:
         try:
             cdata = self.get_course(course_id)
-            course = CanvasCourse(id=course_id, name=cdata.get("name") or f"Curso {course_id}")
+            course = CanvasCourse(id=course_id, name=cdata.get("name") or f"{_('Curso')} {course_id}")
         except (CanvasAPIError, requests.HTTPError):
-            course = CanvasCourse(id=course_id, name=f"Curso_{course_id}")
+            course = CanvasCourse(id=course_id, name=f"{_('Curso')}_{course_id}")
 
         tree = CourseTree(course)
 
         try:
             for module in self.get_modules(course_id):
-                mname = module.get("name", f"Modulo {module.get('id')}")
+                mname = module.get("name", f"{_('Modulo')} {module.get('id')}")
                 for item in module.get("items", []):
                     if item.get("type") != "File":
                         continue
@@ -263,7 +264,7 @@ class CanvasAPIClient:
                     tree.add_file(CanvasFile(
                         id=fid,
                         folder_id=None,
-                        display_name=item.get("title") or "archivo",
+                        display_name=item.get("title") or _("archivo"),
                         module_name=mname,
                         module_id=module.get("id"),
                         size=content.get("size"),
@@ -301,7 +302,7 @@ class CanvasAPIClient:
                     tree.add_file(CanvasFile(
                         id=fid,
                         folder_id=folder_id,
-                        display_name=f.get("display_name") or "archivo",
+                        display_name=f.get("display_name") or _("archivo"),
                         module_name=None,
                         size=f.get("size"),
                         url=f.get("url"),
@@ -317,7 +318,7 @@ class CanvasAPIClient:
 
 def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
     """Builds a rich Tree and returns a mapping from index -> file_id."""
-    root_node = Tree(f"[primary][Curso] {course_tree.course.name}[/]")
+    root_node = Tree(f"[primary][{_('Curso')}] {course_tree.course.name}[/]")
     counter = [0]
     index_map: Dict[int, int] = {}
     
@@ -333,8 +334,8 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
             size_str = human_readable_size(file.size)
             size_display = f" [muted]({size_str})[/]"
         flags = ""
-        if file.locked: flags = " [secondary][Bloqueado][/]"
-        elif file.hidden: flags = " [secondary][Oculto][/]"
+        if file.locked: flags = f" [secondary][{_('Bloqueado')}][/]"
+        elif file.hidden: flags = f" [secondary][{_('Oculto')}][/]"
         node.add(f"[{idx}] [primary]{file.display_name}[/]{size_display}{flags}")
 
     def _populate_folder(fid: int, node: Tree):
@@ -342,7 +343,7 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         subs = [course_tree.folders[sid] for sid in subids if sid in course_tree.folders]
         subs.sort(key=lambda x: x.name.lower())
         for s in subs:
-            fnode = node.add(f"[module][Carpeta] {s.name}[/]")
+            fnode = node.add(f"[module][{_('Carpeta')}] {s.name}[/]")
             _populate_folder(s.id, fnode)
             
         fs = course_tree.folder_files_map.get(fid, [])
@@ -354,7 +355,7 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         mdict = defaultdict(list)
         for f in module_files: mdict[f.module_name].append(f)
         for mname, fs in mdict.items():
-            mnode = root_node.add(f"[module][Modulo] {mname}[/]")
+            mnode = root_node.add(f"[module][{_('Modulo')}] {mname}[/]")
             fs.sort(key=lambda x: x.display_name.lower())
             for f in fs: _add_file(mnode, f)
             
@@ -364,7 +365,7 @@ def build_rich_tree(course_tree: CourseTree) -> Tuple[Tree, Dict[int, int]]:
         else:
             for fid, f in course_tree.folders.items():
                 if f.parent_folder_id is None:
-                    fnode = root_node.add(f"[module][Carpeta] {f.name}[/]")
+                    fnode = root_node.add(f"[module][{_('Carpeta')}] {f.name}[/]")
                     _populate_folder(fid, fnode)
                     
     else:

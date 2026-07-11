@@ -1,0 +1,299 @@
+# DownVas CLI — Catálogo de mensajes en español
+# Copyright (C) 2024 DownVas
+# SPDX-License-Identifier: MIT
+#
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: es\n"
+
+# ── main.py ────────────────────────────────────────────────────────────────
+msgid "   DownVas - Canvas Downloader"
+msgstr "   DownVas - Canvas Downloader"
+
+msgid "Verificando credenciales..."
+msgstr "Verificando credenciales..."
+
+msgid "Token invalido o expirado."
+msgstr "Token invalido o expirado."
+
+msgid "Desea reconfigurar?"
+msgstr "Desea reconfigurar?"
+
+msgid "Ingrese el ID del curso o URL completa"
+msgstr "Ingrese el ID del curso o URL completa"
+
+msgid "o '$s' para reconfigurar"
+msgstr "o '$s' para reconfigurar"
+
+msgid "El dominio ingresado no coincide con el configurado."
+msgstr "El dominio ingresado no coincide con el configurado."
+
+msgid "Desea actualizar la URL?"
+msgstr "Desea actualizar la URL?"
+
+msgid "Validando curso..."
+msgstr "Validando curso..."
+
+msgid "ID invalido."
+msgstr "ID invalido."
+
+msgid "Curso no encontrado o sin permisos."
+msgstr "Curso no encontrado o sin permisos."
+
+msgid "Error al cargar curso"
+msgstr "Error al cargar curso"
+
+msgid "MENU"
+msgstr "MENU"
+
+msgid "Ver listado del curso"
+msgstr "Ver listado del curso"
+
+msgid "Actualizar informacion del curso"
+msgstr "Actualizar informacion del curso"
+
+msgid "Descargar un archivo"
+msgstr "Descargar un archivo"
+
+msgid "Descargar varios archivos"
+msgstr "Descargar varios archivos"
+
+msgid "Descargar archivos por extension (ej: .pdf)"
+msgstr "Descargar archivos por extension (ej: .pdf)"
+
+msgid "Descargar todos los archivos del curso"
+msgstr "Descargar todos los archivos del curso"
+
+msgid "Descargar por seccion"
+msgstr "Descargar por seccion"
+
+msgid "Reasignar credenciales"
+msgstr "Reasignar credenciales"
+
+msgid "Cambiar de curso"
+msgstr "Cambiar de curso"
+
+msgid "Salir"
+msgstr "Salir"
+
+msgid "Opcion"
+msgstr "Opcion"
+
+msgid "Opcion invalida."
+msgstr "Opcion invalida."
+
+msgid "Saliendo..."
+msgstr "Saliendo..."
+
+msgid "Interrumpido."
+msgstr "Interrumpido."
+
+msgid "Curso cargado"
+msgstr "Curso cargado"
+
+# ── cli.py ─────────────────────────────────────────────────────────────────
+msgid "CONFIGURACIÓN DE DOWNVAS"
+msgstr "CONFIGURACIÓN DE DOWNVAS"
+
+msgid "Por favor, configure los parámetros de conexión de Canvas LMS."
+msgstr "Por favor, configure los parámetros de conexión de Canvas LMS."
+
+msgid "URL de Canvas LMS"
+msgstr "URL de Canvas LMS"
+
+msgid " (presione Enter para mantener el token actual)"
+msgstr " (presione Enter para mantener el token actual)"
+
+msgid "Token de acceso de Canvas"
+msgstr "Token de acceso de Canvas"
+
+msgid "Carpeta de descarga local"
+msgstr "Carpeta de descarga local"
+
+msgid "Configuracion guardada en .env"
+msgstr "Configuracion guardada en .env"
+
+msgid "Idioma de la interfaz"
+msgstr "Idioma de la interfaz"
+
+msgid "Opciones validas"
+msgstr "Opciones validas"
+
+msgid "Error guardando configuración"
+msgstr "Error guardando configuración"
+
+msgid "Multiples archivos coinciden con"
+msgstr "Multiples archivos coinciden con"
+
+msgid "Seleccione el numero del archivo (Enter para cancelar)"
+msgstr "Seleccione el numero del archivo (Enter para cancelar)"
+
+msgid "Ingrese el indice, nombre o ruta del archivo"
+msgstr "Ingrese el indice, nombre o ruta del archivo"
+
+msgid "Archivo no encontrado."
+msgstr "Archivo no encontrado."
+
+msgid "Agregue archivos. Escriba 'finalizar' para terminar."
+msgstr "Agregue archivos. Escriba 'finalizar' para terminar."
+
+msgid "Archivo"
+msgstr "Archivo"
+
+msgid "Agregado"
+msgstr "Agregado"
+
+msgid "No encontrado."
+msgstr "No encontrado."
+
+msgid "Confirmar descarga de $n archivos?"
+msgstr "Confirmar descarga de $n archivos?"
+
+msgid "Extension (ej: .pdf)"
+msgstr "Extension (ej: .pdf)"
+
+msgid "Descargar $n archivos?"
+msgstr "Descargar $n archivos?"
+
+msgid "No se encontraron archivos."
+msgstr "No se encontraron archivos."
+
+msgid "Descargar todo ($n archivos)?"
+msgstr "Descargar todo ($n archivos)?"
+
+msgid "Actualizando..."
+msgstr "Actualizando..."
+
+msgid "Actualizado."
+msgstr "Actualizado."
+
+msgid "ID del nuevo curso"
+msgstr "ID del nuevo curso"
+
+msgid "Cambiado a"
+msgstr "Cambiado a"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Secciones disponibles:"
+msgstr "Secciones disponibles:"
+
+msgid "Seleccione el numero de la seccion (Enter para cancelar)"
+msgstr "Seleccione el numero de la seccion (Enter para cancelar)"
+
+msgid "No se encontraron secciones en el curso."
+msgstr "No se encontraron secciones en el curso."
+
+msgid "Descargar $n archivos de la seccion '$s'?"
+msgstr "Descargar $n archivos de la seccion '$s'?"
+
+msgid "Entrada invalida."
+msgstr "Entrada invalida."
+
+# ── courses.py ─────────────────────────────────────────────────────────────
+msgid "Token de acceso invalido o expirado."
+msgstr "Token de acceso invalido o expirado."
+
+msgid "El curso no fue encontrado."
+msgstr "El curso no fue encontrado."
+
+msgid "Limite de solicitudes alcanzado."
+msgstr "Limite de solicitudes alcanzado."
+
+msgid "Acceso denegado"
+msgstr "Acceso denegado"
+
+msgid "Error HTTP"
+msgstr "Error HTTP"
+
+msgid "No se pudo establecer conexion"
+msgstr "No se pudo establecer conexion"
+
+msgid "Error de red inesperado"
+msgstr "Error de red inesperado"
+
+msgid "Curso"
+msgstr "Curso"
+
+msgid "Modulo"
+msgstr "Modulo"
+
+msgid "Carpeta"
+msgstr "Carpeta"
+
+msgid "Bloqueado"
+msgstr "Bloqueado"
+
+msgid "Oculto"
+msgstr "Oculto"
+
+msgid "archivo"
+msgstr "archivo"
+
+# ── downloader.py ──────────────────────────────────────────────────────────
+msgid "Ya existe, omitido"
+msgstr "Ya existe, omitido"
+
+msgid "RESUMEN DE DESCARGA"
+msgstr "RESUMEN DE DESCARGA"
+
+msgid "Detalle de Operaciones"
+msgstr "Detalle de Operaciones"
+
+msgid "Descargado"
+msgstr "Descargado"
+
+msgid "Omitido (ya existente)"
+msgstr "Omitido (ya existente)"
+
+msgid "Fallido"
+msgstr "Fallido"
+
+msgid "... y $n archivos mas"
+msgstr "... y $n archivos mas"
+
+msgid "Archivos procesados:"
+msgstr "Archivos procesados:"
+
+msgid "Descargados con exito:"
+msgstr "Descargados con exito:"
+
+msgid "Omitidos (ya existentes):"
+msgstr "Omitidos (ya existentes):"
+
+msgid "Fallidos con error:"
+msgstr "Fallidos con error:"
+
+msgid "Total descargado:"
+msgstr "Total descargado:"
+
+msgid "Tiempo total:"
+msgstr "Tiempo total:"
+
+msgid "Velocidad media:"
+msgstr "Velocidad media:"
+
+msgid "Métricas de Descarga"
+msgstr "Métricas de Descarga"
+
+msgid "No se encontro la URL de descarga para el archivo"
+msgstr "No se encontro la URL de descarga para el archivo"
+
+msgid "La descarga devolvio JSON inesperado en lugar de binario."
+msgstr "La descarga devolvio JSON inesperado en lugar de binario."
+
+msgid "Error descargando"
+msgstr "Error descargando"
+
+# ── core.py ────────────────────────────────────────────────────────────────
+msgid "La URL de Canvas no puede estar vacia."
+msgstr "La URL de Canvas no puede estar vacia."
+
+msgid "La URL de Canvas debe comenzar con http:// o https://"
+msgstr "La URL de Canvas debe comenzar con http:// o https://"
+
+msgid "El token de acceso no puede estar vacio."
+msgstr "El token de acceso no puede estar vacio."

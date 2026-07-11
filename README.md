@@ -1,82 +1,87 @@
 # DownVas - Canvas Downloader CLI
 
-DownVas es una herramienta de interfaz de línea de comandos (CLI) escrita en Python para descargar de forma estructurada e interactiva los archivos de cursos alojados en Canvas LMS.
+DownVas is a Command Line Interface (CLI) tool written in Python to interactively and systematically download course files hosted on Canvas LMS.
 
-## Características Principales
+## Key Features
 
-- **Autenticación mediante Token**: Configura tu URL de Canvas y tu token de acceso (API Token) de manera segura y sencilla.
-- **Exploración Jerárquica**: Visualiza todo el contenido de tu curso en una estructura de árbol (Carpetas, Módulos y Archivos) con colores distintivos por tipo de archivo, todo desde la terminal.
-- **Multiples Opciones de Descarga**:
-  - Descargar un archivo especifico (por su ID, nombre o indice en el arbol).
-  - Descargar una cola de varios archivos seleccionados manualmente.
-  - Descargar todos los archivos con una extension especifica (ej. `.pdf`, `.pptx`).
-  - Descargar todos los archivos del curso de una sola vez.
-- **Descargas Robustas**: 
-  - Las descargas se realizan en fragmentos e incluyen una barra de progreso detallada con velocidad de transferencia y tiempo restante.
-  - Se utilizan archivos temporales (`.part`) durante la transferencia para evitar archivos corruptos si se interrumpe la conexion.
-  - Soporte nativo para saltar (omitir) automaticamente archivos que ya se encuentren descargados localmente.
-- **Organizacion Automatica**: Los archivos descargados se guardan automaticamente respetando la estructura de carpetas y modulos originales del curso.
+- **Token Authentication**: Securely and easily configure your Canvas URL and access token (API Token).
+- **Multi-language Support (i18n)**: Interface available in English and Spanish, configurable through the wizard.
+- **Hierarchical Exploration**: Visualize all your course content in a tree structure (Folders, Modules, and Files) with distinctive colors by file type, entirely from your terminal.
+- **Multiple Download Options**:
+  - Download a specific file (by ID, name, or tree index).
+  - Download a queue of manually selected files.
+  - Download all files with a specific extension (e.g., `.pdf`, `.pptx`).
+  - Download all course files at once.
+  - Download all files from a specific section or module.
+- **Robust Downloads**: 
+  - Downloads are chunked and include a detailed progress bar with transfer speed and estimated time remaining.
+  - Temporary files (`.part`) are used during transfers to prevent corrupted files if the connection drops.
+  - Native support to automatically skip files that have already been downloaded locally.
+- **Automatic Organization**: Downloaded files are automatically saved respecting the course's original folder and module structure.
 
-## Requisitos
+## Requirements
 
 - Python 3.10+
-- Dependencias (pueden ser instaladas vía `requirements.txt`):
+- Dependencies (can be installed via `requirements.txt`):
   - `requests`
   - `rich`
   - `pydantic`
   - `python-dotenv`
 
-## Instalación
+## Installation
 
-1. Clona o descarga este repositorio.
-2. Crea y activa tu entorno virtual (opcional pero recomendado):
+1. Clone or download this repository.
+2. Create and activate a virtual environment (optional but recommended):
    ```bash
    python -m venv env
    ```
    - **Linux/macOS**: `source env/bin/activate`
    - **Windows**: `env\Scripts\activate`
-3. Instala las dependencias:
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-## Uso
+## Usage
 
-Para iniciar el asistente y el menú principal, simplemente ejecuta:
+To start the wizard and the main menu, simply run:
 
 ```bash
 python main.py
 ```
 
-### Primer inicio (Configuración)
-Si es la primera vez que lo ejecutas, DownVas iniciará un asistente interactivo pidiendo:
-1. **URL de Canvas LMS** (por ejemplo: `https://canvas.instructure.com` o el dominio de tu universidad).
-2. **Token de acceso** (puedes generarlo desde Canvas -> Cuenta -> Configuraciones -> Nuevo Token de Acceso).
-3. **Carpeta de descarga local** (la ruta donde deseas guardar los cursos, ej. `./Descargas`).
+### First Launch (Configuration)
+If this is your first time running it, DownVas will start an interactive wizard asking for:
+1. **Canvas LMS URL** (e.g., `https://canvas.instructure.com` or your university's domain).
+2. **Access token** (can be generated from Canvas -> Account -> Settings -> New Access Token).
+3. **Interface language** (select `en` for English or `es` for Spanish).
+4. **Local download folder** (the path where you want to save the courses, e.g., `./Downloads` or `./Descargas` adapting to the language).
 
-*Estos datos se guardarán localmente en un archivo `.env`.*
+*These details will be stored locally in a `.env` file.*
 
-### Menú Principal
-Una vez configurado y tras ingresar el ID de un curso (o su URL completa), se te presentará un menú interactivo con las siguientes opciones:
+### Main Menu
+Once configured, after entering a course ID (or full URL), you will be presented with an interactive menu with the following options:
 
-1. **Ver listado del curso**: Imprime la estructura jerárquica de archivos, carpetas y módulos.
-2. **Actualizar información del curso**: Vuelve a cargar el árbol de archivos desde el servidor.
-3. **Descargar un archivo**: Selecciona y descarga un único archivo.
-4. **Descargar varios archivos**: Permite agregar archivos a una cola y descargarlos en lote.
-5. **Descargar archivos por extensión (ej: .pdf)**: Filtra y descarga todos los `.pdf`, `.ppt`, etc.
-6. **Descargar todos los archivos del curso**: Descarga el curso completo manteniendo la jerarquía de carpetas.
-7. **Descargar por sección**: Descarga todos los archivos de un módulo o carpeta específica.
-8. **Reasignar credenciales**: Opción de reconfiguración.
-9. **Cambiar de curso**: Permite ingresar un nuevo ID para explorar otro curso.
-10. **Salir**
+1. **View course listing**: Prints the hierarchical structure of files, folders, and modules.
+2. **Refresh course information**: Reloads the file tree from the server.
+3. **Download a single file**: Selects and downloads a single file.
+4. **Download multiple files**: Allows you to queue files and download them in a batch.
+5. **Download files by extension (e.g.: .pdf)**: Filters and downloads all `.pdf`, `.ppt`, etc.
+6. **Download all course files**: Downloads the complete course preserving the folder hierarchy.
+7. **Download by section**: Downloads all files from a specific module or folder.
+8. **Reassign credentials**: Configuration wizard option.
+9. **Switch course**: Lets you enter a new ID to explore another course.
+10. **Exit**
 
-## Estructura de Directorios
+## Directory Structure
 
-- `main.py`: Punto de entrada de la aplicación y controlador del menú interactivo.
+- `main.py`: Application entry point and interactive menu controller.
 - `src/`
-  - `cli.py`: Handlers de cada opción del menú (asistente de configuración, descargas, actualización, cambio de curso/URL/token).
-  - `core.py`: Definición de errores comunes, utilidades (ej. validación de URLs) y carga de configuraciones (Settings).
-  - `courses.py`: Cliente de la API de Canvas, manejo de peticiones paginadas y generación del árbol jerárquico.
-  - `downloader.py`: Servicio dedicado a la descarga de archivos en fragmentos, manejo de archivos `.part` e interfaz de la barra de progreso.
-  - `theme.py`: Definición centralizada del tema visual (colores y estilos) de la interfaz de terminal.
-- `.env`: (Generado automaticamente) Archivo de variables de entorno para almacenar credenciales.
+  - `cli.py`: Handlers for each menu option (configuration wizard, downloads, refresh, change course/URL/token).
+  - `core.py`: Definitions for common errors, utilities (e.g., URL validation) and configuration loading (Settings).
+  - `courses.py`: Canvas API client, paginated requests handling, and hierarchical tree generation.
+  - `downloader.py`: Dedicated service for chunked file downloading, `.part` file handling, and progress bar interface.
+  - `i18n.py`: Internationalization engine to translate the interface.
+  - `theme.py`: Centralized definition of the terminal interface visual theme (colors and styles).
+- `locales/`: Translation files and compiled dictionaries (`.po` and `.mo`).
+- `.env`: (Auto-generated) Environment variables file for storing credentials.
