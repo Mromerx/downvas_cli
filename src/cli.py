@@ -225,8 +225,9 @@ def handle_download_by_section(course_tree: CourseTree, settings: Settings, down
             selected_name = section_names[c_idx]
             files_to_download = sections[selected_name]
             
+            msg = Template(_("Descargar $n archivos de la seccion '$s'?")).safe_substitute(n=len(files_to_download), s=selected_name)
             if Confirm.ask(
-                f"[primary]{Template(_('Descargar $n archivos de la seccion \'$s\'?')).safe_substitute(n=len(files_to_download), s=selected_name)}[/]",
+                f"[primary]{msg}[/]",
                 default=True
             ):
                 jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in files_to_download]

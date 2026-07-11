@@ -21,22 +21,22 @@ DownVas is a Command Line Interface (CLI) tool written in Python to interactivel
 
 ## Requirements
 
-- Python 3.10+
+- Python 3.10+ (tested on 3.11)
 - Dependencies (can be installed via `requirements.txt`):
-  - `requests`
-  - `rich`
-  - `pydantic`
-  - `python-dotenv`
+  - `requests==2.34.2`
+  - `rich==15.0.0`
+  - `pydantic==2.13.4`
+  - `python-dotenv==1.2.2`
 
 ## Installation
 
 1. Clone or download this repository.
 2. Create and activate a virtual environment (optional but recommended):
    ```bash
-   python -m venv env
+   python -m venv .venv
    ```
-   - **Linux/macOS**: `source env/bin/activate`
-   - **Windows**: `env\Scripts\activate`
+   - **Linux/macOS**: `source .venv/bin/activate`
+   - **Windows**: `.venv\Scripts\activate`
 3. Install dependencies:
    ```bash
    pip install -r requirements.txt
