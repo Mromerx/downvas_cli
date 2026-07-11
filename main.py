@@ -48,18 +48,18 @@ def main() -> None:
     api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
     downloader = DownloaderService(settings.canvas_url, settings.api_token)
     
-    try:
-        with console.status("[success]Verificando credenciales...[/]"):
-            api_client.verify_authentication()
-    except CanvasAuthError:
-        console.print("[error]Token invalido o expirado.[/]")
-        if Confirm.ask("[primary]Desea reconfigurar?[/]", default=True):
+    while True:
+        try:
+            with console.status("[success]Verificando credenciales...[/]"):
+                api_client.verify_authentication()
+            break
+        except CanvasAuthError:
+            console.print("[error]Token invalido o expirado.[/]")
+            if not Confirm.ask("[primary]Desea reconfigurar?[/]", default=True):
+                sys.exit(1)
             settings = run_config_wizard()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
-            api_client.verify_authentication()
-        else:
-            sys.exit(1)
             
     course_id: Optional[int] = None
     course_tree: Optional[CourseTree] = None
@@ -73,6 +73,11 @@ def main() -> None:
             console.clear()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
+            try:
+                with console.status("[success]Verificando credenciales...[/]"):
+                    api_client.verify_authentication()
+            except CanvasAuthError:
+                console.print("[error]Token invalido o expirado.[/]")
             continue
         cid = extract_course_id(cid_str)
         if cid is None:
@@ -143,6 +148,11 @@ def main() -> None:
             console.clear()
             api_client = CanvasAPIClient(settings.canvas_url, settings.api_token)
             downloader = DownloaderService(settings.canvas_url, settings.api_token)
+            try:
+                with console.status("[success]Verificando credenciales...[/]"):
+                    api_client.verify_authentication()
+            except CanvasAuthError:
+                console.print("[error]Token invalido o expirado.[/]")
         elif option == "9":
             new_cid, new_ctree, new_rtree, new_imap = handle_change_course(api_client)
             if new_cid is not None:
