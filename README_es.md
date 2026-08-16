@@ -64,9 +64,9 @@ Si es la primera vez que lo ejecutas, DownVas iniciará un asistente interactivo
 El prompt de curso acepta un ID numérico o cualquiera de estos formatos de URL:
 
 - **ID de curso**: `107487`
-- **URL de curso**: `https://canvas.uautonoma.cl/courses/107487`
-- **URL de archivo**: `https://canvas.uautonoma.cl/courses/107487/files/8092477` — carga el curso y además resuelve ese archivo concreto, incluso si aún no está en el árbol.
-- **URL de item de módulo**: `https://canvas.uautonoma.cl/courses/107487/modules/items/4024443` — carga el curso y resuelve el contenido de ese item de módulo para listar y descargar sus archivos. Tipos de item soportados:
+- **URL de curso**: `https://canvas.instructure.com/courses/107487`
+- **URL de archivo**: `https://canvas.instructure.com/courses/107487/files/8092477` — carga el curso y además resuelve ese archivo concreto, incluso si aún no está en el árbol.
+- **URL de item de módulo**: `https://canvas.instructure.com/courses/107487/modules/items/4024443` — carga el curso y resuelve el contenido de ese item de módulo para listar y descargar sus archivos. Tipos de item soportados:
   - `Page` — lee el cuerpo de la página y lista los archivos enlazados.
   - `File` — un archivo directo de Canvas.
   - `Assignment`, `Discussion` y `Quiz` — escanea el HTML de description/message y los adjuntos (attachments).
