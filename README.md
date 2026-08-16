@@ -2,6 +2,9 @@
 
 DownVas is a Command Line Interface (CLI) tool written in Python to interactively and systematically download course files hosted on Canvas LMS.
 
+![Uploading image.png…]()
+
+
 ## Key Features
 
 - **Token Authentication**: Securely and easily configure your Canvas URL and access token (API Token).
