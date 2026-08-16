@@ -123,7 +123,9 @@ def handle_view_tree(rich_tree: Tree):
     console.print(rich_tree)
 
 def handle_download_single(course_tree: CourseTree, settings: Settings, downloader: DownloaderService, index_map: Dict[int, int]):
-    query = Prompt.ask(f"\n{_('Ingrese el indice, nombre o ruta del archivo')}").strip()
+    query = Prompt.ask(f"\n{_('Ingrese el indice, nombre o ruta del archivo (Enter para cancelar)')}").strip()
+    if not query:
+        return
     file = resolve_file(course_tree, query, index_map)
     if file:
         dest = course_tree.get_file_download_path(file.id, settings.download_dir)
@@ -134,7 +136,7 @@ def handle_download_single(course_tree: CourseTree, settings: Settings, download
 def handle_download_multi(course_tree: CourseTree, settings: Settings, downloader: DownloaderService, index_map: Dict[int, int]):
     queue: List[CanvasFile] = []
     # Sentinel "finalizar" / "finish" — se compara contra ambas formas
-    console.print(Template(_("Agregue archivos. Escriba 'finalizar' para terminar.")).safe_substitute())
+    console.print(Template(_("Agregue archivos. Escriba 'finalizar' para terminar. (Enter para cancelar)")).safe_substitute())
     while True:
         q = Prompt.ask(_("Archivo")).strip()
         if not q or q.lower() in ("finalizar", "finish"):
@@ -153,7 +155,7 @@ def handle_download_multi(course_tree: CourseTree, settings: Settings, downloade
         downloader.download_jobs(jobs)
 
 def handle_download_by_ext(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
-    ext = Prompt.ask(f"\n{_('Extension (ej: .pdf)')}").strip()
+    ext = Prompt.ask(f"\n{_('Extension (ej: .pdf) (Enter para cancelar)')}").strip()
     if ext:
         fs = course_tree.get_files_by_extension(ext)
         if fs and Confirm.ask(

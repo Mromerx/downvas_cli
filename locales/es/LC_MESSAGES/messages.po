@@ -322,3 +322,12 @@ msgstr "No se pudieron resolver los archivos del item de modulo"
 
 msgid "Todas las URLs de descarga fallaron."
 msgstr "Todas las URLs de descarga fallaron."
+
+msgid "Ingrese el indice, nombre o ruta del archivo (Enter para cancelar)"
+msgstr "Ingrese el indice, nombre o ruta del archivo (Enter para cancelar)"
+
+msgid "Agregue archivos. Escriba 'finalizar' para terminar. (Enter para cancelar)"
+msgstr "Agregue archivos. Escriba 'finalizar' para terminar. (Enter para cancelar)"
+
+msgid "Extension (ej: .pdf) (Enter para cancelar)"
+msgstr "Extension (ej: .pdf) (Enter para cancelar)"
