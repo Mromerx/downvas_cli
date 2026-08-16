@@ -59,6 +59,21 @@ If this is your first time running it, DownVas will start an interactive wizard 
 
 *These details will be stored locally in a `.env` file.*
 
+### Supported Course ID / URL Inputs
+
+The course prompt accepts a numeric ID or any of the following URL formats:
+
+- **Course ID**: `107487`
+- **Course URL**: `https://canvas.uautonoma.cl/courses/107487`
+- **File URL**: `https://canvas.uautonoma.cl/courses/107487/files/8092477` — loads the course and also resolves that specific file, even if it is not in the tree yet.
+- **Module item URL**: `https://canvas.uautonoma.cl/courses/107487/modules/items/4024443` — loads the course and resolves the contents of that module item so its files can be listed and downloaded. Supported item types:
+  - `Page` — reads the page body and lists every file linked in it.
+  - `File` — a direct Canvas file.
+  - `Assignment`, `Discussion` and `Quiz` — scans the description/message HTML plus the file attachments.
+  - `ExternalUrl` / `ExternalTool` / `SubHeader` — no Canvas-hosted files are extracted.
+
+> Example: a module page like `.../courses/107487/modules/items/4024443` (`type: Page`) lists its linked files under "Pages → <page title>", and they download like any other course file.
+
 ### Main Menu
 Once configured, after entering a course ID (or full URL), you will be presented with an interactive menu with the following options:
 

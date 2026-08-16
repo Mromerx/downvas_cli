@@ -138,6 +138,33 @@ def extract_course_id(input_str: str) -> int | None:
         return int(match.group(1))
     return None
 
+def extract_file_id(input_str: str) -> int | None:
+    """Extrae un ID de archivo de Canvas desde una URL como
+    /courses/:id/files/:file_id o /files/:file_id."""
+    cleaned = input_str.strip()
+    if not cleaned:
+        return None
+    import re
+    # Enlaces de archivo con y sin contexto de curso (con ?module_item_id=... incluido).
+    match = re.search(r"(?:/courses/\d+/)?(?:/api/v1/)?files?/(\d+)", cleaned)
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def extract_module_item_id(input_str: str) -> int | None:
+    """Extrae el ID de un item de módulo de Canvas desde una URL como
+    /courses/:id/modules/items/:item_id."""
+    cleaned = input_str.strip()
+    if not cleaned:
+        return None
+    import re
+    match = re.search(r"(?:/courses/\d+/)?modules/items/(\d+)", cleaned)
+    if match:
+        return int(match.group(1))
+    return None
+
+
 def extract_domain(url: str) -> str | None:
     from urllib.parse import urlparse
     try:

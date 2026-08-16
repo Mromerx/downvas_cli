@@ -18,6 +18,8 @@ from src.core import (
     CourseNotFoundError,
     extract_course_id,
     extract_domain,
+    extract_file_id,
+    extract_module_item_id,
     clear_screen,
 )
 from src.courses import CanvasAPIClient, CourseTree, build_rich_tree
@@ -111,6 +113,8 @@ def main() -> None:
         if cid is None:
             console.print(f"[error]{_('ID invalido.')}[/]")
             continue
+        wanted_file_id = extract_file_id(cid_str)
+        wanted_module_item_id = extract_module_item_id(cid_str)
             
         domain = extract_domain(cid_str)
         if domain and domain.rstrip("/") != settings.canvas_url.rstrip("/"):
@@ -126,6 +130,13 @@ def main() -> None:
                 cname = api_client.fetch_course_name(cid)
             with console.status(f"[success]{Template(_('Actualizando...')).safe_substitute()}[/]"):
                 course_tree = api_client.fetch_course_tree(cid)
+                if wanted_file_id:
+                    api_client.ensure_file_in_tree(course_tree, cid, wanted_file_id)
+                if wanted_module_item_id:
+                    try:
+                        api_client.add_module_item_to_tree(course_tree, cid, wanted_module_item_id)
+                    except Exception as e:
+                        console.print(f"[secondary]{_('No se pudieron resolver los archivos del item de modulo')}: {e}[/]")
                 rich_tree, index_map = build_rich_tree(course_tree)
             course_id = cid
             console.print(f"[success]{_('Curso cargado')}: {course_tree.course.name}[/]")

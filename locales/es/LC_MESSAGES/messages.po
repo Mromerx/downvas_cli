@@ -219,7 +219,13 @@ msgid "Curso"
 msgstr "Curso"
 
 msgid "Modulo"
-msgstr "Modulo"
+msgstr "Módulo"
+
+msgid "Página"
+msgstr "Página"
+
+msgid "Páginas"
+msgstr "Páginas"
 
 msgid "Carpeta"
 msgstr "Carpeta"
@@ -232,6 +238,15 @@ msgstr "Oculto"
 
 msgid "archivo"
 msgstr "archivo"
+
+msgid "Tarea"
+msgstr "Tarea"
+
+msgid "Discusión"
+msgstr "Discusión"
+
+msgid "Sílabo"
+msgstr "Sílabo"
 
 # ── downloader.py ──────────────────────────────────────────────────────────
 msgid "Ya existe, omitido"
@@ -297,3 +312,13 @@ msgstr "La URL de Canvas debe comenzar con http:// o https://"
 
 msgid "El token de acceso no puede estar vacio."
 msgstr "El token de acceso no puede estar vacio."
+
+# ── nuevo: items de modulo ───────────────────────────────────────
+msgid "Contenido"
+msgstr "Contenido"
+
+msgid "No se pudieron resolver los archivos del item de modulo"
+msgstr "No se pudieron resolver los archivos del item de modulo"
+
+msgid "Todas las URLs de descarga fallaron."
+msgstr "Todas las URLs de descarga fallaron."

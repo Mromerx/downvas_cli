@@ -59,6 +59,21 @@ Si es la primera vez que lo ejecutas, DownVas iniciará un asistente interactivo
 
 *Estos datos se guardarán localmente en un archivo `.env`.*
 
+### Tipos de ID / URL de curso soportados
+
+El prompt de curso acepta un ID numérico o cualquiera de estos formatos de URL:
+
+- **ID de curso**: `107487`
+- **URL de curso**: `https://canvas.uautonoma.cl/courses/107487`
+- **URL de archivo**: `https://canvas.uautonoma.cl/courses/107487/files/8092477` — carga el curso y además resuelve ese archivo concreto, incluso si aún no está en el árbol.
+- **URL de item de módulo**: `https://canvas.uautonoma.cl/courses/107487/modules/items/4024443` — carga el curso y resuelve el contenido de ese item de módulo para listar y descargar sus archivos. Tipos de item soportados:
+  - `Page` — lee el cuerpo de la página y lista los archivos enlazados.
+  - `File` — un archivo directo de Canvas.
+  - `Assignment`, `Discussion` y `Quiz` — escanea el HTML de description/message y los adjuntos (attachments).
+  - `ExternalUrl` / `ExternalTool` / `SubHeader` — no se extraen archivos alojados en Canvas.
+
+> Ejemplo: una página de módulo como `.../courses/107487/modules/items/4024443` (tipo `Page`) lista sus archivos enlazados bajo "Páginas → <título de la página>" y se descargan como cualquier archivo del curso.
+
 ### Menú Principal
 Una vez configurado y tras ingresar el ID de un curso (o su URL completa), se te presentará un menú interactivo con las siguientes opciones:
 

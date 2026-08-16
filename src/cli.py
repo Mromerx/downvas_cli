@@ -8,7 +8,7 @@ from rich.prompt import Confirm, Prompt
 from rich.tree import Tree
 from src.theme import console
 
-from src.core import Settings, extract_course_id, human_readable_size
+from src.core import Settings, extract_course_id, extract_module_item_id, human_readable_size
 from src.courses import CanvasAPIClient, CourseTree, CanvasFile, build_rich_tree
 from src.downloader import DownloaderService, DownloadJob
 from src.i18n import _
@@ -127,7 +127,7 @@ def handle_download_single(course_tree: CourseTree, settings: Settings, download
     file = resolve_file(course_tree, query, index_map)
     if file:
         dest = course_tree.get_file_download_path(file.id, settings.download_dir)
-        downloader.download_jobs([DownloadJob(file.url, dest, file.size, file.display_name, file.id, file.module_name is not None)])
+        downloader.download_jobs([DownloadJob(file.url, dest, file.size, file.display_name, file.id, file.module_name is not None, file.course_id)])
     else:
         console.print(f"[error]{_('Archivo no encontrado.')}[/]")
 
@@ -149,7 +149,7 @@ def handle_download_multi(course_tree: CourseTree, settings: Settings, downloade
         f"[primary]{Template(_('Confirmar descarga de $n archivos?')).safe_substitute(n=len(queue))}[/]",
         default=True
     ):
-        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in queue]
+        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None, f.course_id) for f in queue]
         downloader.download_jobs(jobs)
 
 def handle_download_by_ext(course_tree: CourseTree, settings: Settings, downloader: DownloaderService):
@@ -160,7 +160,7 @@ def handle_download_by_ext(course_tree: CourseTree, settings: Settings, download
             f"[primary]{Template(_('Descargar $n archivos?')).safe_substitute(n=len(fs))}[/]",
             default=True
         ):
-            jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in fs]
+            jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None, f.course_id) for f in fs]
             downloader.download_jobs(jobs)
         elif not fs:
             console.print(f"[secondary]{_('No se encontraron archivos.')}[/]")
@@ -171,7 +171,7 @@ def handle_download_all(course_tree: CourseTree, settings: Settings, downloader:
         f"[primary]{Template(_('Descargar todo ($n archivos)?')).safe_substitute(n=len(fs))}[/]",
         default=True
     ):
-        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in fs]
+        jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None, f.course_id) for f in fs]
         downloader.download_jobs(jobs)
 
 def handle_refresh(course_id: int, api_client: CanvasAPIClient) -> Tuple[CourseTree, Tree, Dict[int, int]]:
@@ -184,12 +184,18 @@ def handle_refresh(course_id: int, api_client: CanvasAPIClient) -> Tuple[CourseT
 def handle_change_course(api_client: CanvasAPIClient) -> Tuple[Optional[int], Optional[CourseTree], Optional[Tree], Dict[int, int]]:
     cid_str = Prompt.ask(f"\n{_('ID del nuevo curso')}").strip()
     cid = extract_course_id(cid_str)
+    item_id = extract_module_item_id(cid_str)
     if cid:
         try:
             with console.status(f"[success]{_('Validando curso...')}[/]"):
                 cname = api_client.fetch_course_name(cid)
             with console.status(f"[success]{_('Actualizando...')}[/]"):
                 new_tree = api_client.fetch_course_tree(cid)
+                if item_id:
+                    try:
+                        api_client.add_module_item_to_tree(new_tree, cid, item_id)
+                    except Exception as e:
+                        console.print(f"[secondary]{_('No se pudieron resolver los archivos del item de modulo')}: {e}[/]")
                 new_rich_tree, new_map = build_rich_tree(new_tree)
             console.print(f"[success]{_('Cambiado a')}: {new_tree.course.name}[/]")
             return cid, new_tree, new_rich_tree, new_map
@@ -201,8 +207,10 @@ def handle_download_by_section(course_tree: CourseTree, settings: Settings, down
     sections: Dict[str, List[CanvasFile]] = {}
     
     for file in course_tree.files.values():
-        if file.module_name:
-            sections.setdefault(file.module_name, []).append(file)
+        if file.page_name:
+            sections.setdefault(f"[{_('Página')}] {file.page_name}", []).append(file)
+        elif file.module_name:
+            sections.setdefault(f"[{_('Modulo')}] {file.module_name}", []).append(file)
             
     if not sections:
         for folder in course_tree.folders.values():
@@ -234,7 +242,7 @@ def handle_download_by_section(course_tree: CourseTree, settings: Settings, down
                 f"[primary]{msg}[/]",
                 default=True
             ):
-                jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None) for f in files_to_download]
+                jobs = [DownloadJob(f.url, course_tree.get_file_download_path(f.id, settings.download_dir), f.size, f.display_name, f.id, f.module_name is not None, f.course_id) for f in files_to_download]
                 downloader.download_jobs(jobs)
         else:
             console.print(f"[error]{_('Opcion invalida.')}[/]")

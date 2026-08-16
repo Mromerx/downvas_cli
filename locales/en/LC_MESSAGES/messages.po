@@ -221,6 +221,12 @@ msgstr "Course"
 msgid "Modulo"
 msgstr "Module"
 
+msgid "Página"
+msgstr "Page"
+
+msgid "Páginas"
+msgstr "Pages"
+
 msgid "Carpeta"
 msgstr "Folder"
 
@@ -232,6 +238,15 @@ msgstr "Hidden"
 
 msgid "archivo"
 msgstr "file"
+
+msgid "Tarea"
+msgstr "Assignment"
+
+msgid "Discusión"
+msgstr "Discussion"
+
+msgid "Sílabo"
+msgstr "Syllabus"
 
 # ── downloader.py ──────────────────────────────────────────────────────────
 msgid "Ya existe, omitido"
@@ -297,3 +312,13 @@ msgstr "The Canvas URL must start with http:// or https://"
 
 msgid "El token de acceso no puede estar vacio."
 msgstr "The access token cannot be empty."
+
+# ── nuevo: items de modulo ───────────────────────────────────────
+msgid "Contenido"
+msgstr "Content"
+
+msgid "No se pudieron resolver los archivos del item de modulo"
+msgstr "Could not resolve the files of the module item"
+
+msgid "Todas las URLs de descarga fallaron."
+msgstr "All download URLs failed."
