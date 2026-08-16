@@ -3,7 +3,7 @@ Downloader module: File Writing (Data), Queue Management (Domain), and Progress 
 """
 import os
 import requests
-from typing import List, Callable, Optional, Dict
+from typing import List, Callable, Optional, Dict, Tuple
 from pathlib import Path
 from dataclasses import dataclass, field
 from concurrent.futures import ThreadPoolExecutor
@@ -86,6 +86,55 @@ class FileDownloader:
                 return name
         return None
 
+    def _signed_url(self, job: DownloadJob) -> Optional[str]:
+        """Resuelve la URL firmada (verifier) del archivo consultando su metadata.
+
+        Es la URL que usa el navegador; funciona aunque el token no exponga los
+        endpoints de descarga directos (404)."""
+        if not job.course_id:
+            return None
+        for path in (
+            f"{self.base_url}/api/v1/courses/{job.course_id}/files/{job.file_id}",
+            f"{self.base_url}/api/v1/files/{job.file_id}",
+        ):
+            try:
+                r = self.session.get(path, timeout=30)
+                r.raise_for_status()
+                url = r.json().get("url")
+                if isinstance(url, str) and url.startswith("http"):
+                    return url
+            except (requests.RequestException, ValueError):
+                continue
+        return None
+
+    def _stream_to_part(self, url: str, part_file: Path, job: DownloadJob,
+                        progress_callback: Callable[[int], None]) -> Tuple[int, str, Path]:
+        """Descarga url hacia part_file. Devuelve (bytes, nombre_final, part_file)."""
+        final_name = job.destination.name
+        total = 0
+        with self.session.get(url, stream=True, allow_redirects=True, timeout=30) as r:
+            r.raise_for_status()
+
+            content_type = r.headers.get("Content-Type", "")
+            if "application/json" in content_type and not job.display_name.lower().endswith(".json"):
+                raise CanvasAPIError(_("La descarga devolvio JSON inesperado en lugar de binario."))
+
+            # Si el nombre local no tiene extensión, intentar recuperarla de Content-Disposition.
+            if not job.destination.suffix:
+                cd_name = self._name_from_content_disposition(r.headers.get("Content-Disposition", ""))
+                if cd_name and Path(cd_name).suffix:
+                    final_name = Path(cd_name).name
+                    part_file = part_file.with_name(final_name + '.part')
+
+            with open(part_file, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+                        total += len(chunk)
+                        if progress_callback:
+                            progress_callback(len(chunk))
+        return total, final_name, part_file
+
     def download_file(self, job: DownloadJob, progress_callback: Callable[[int], None] = None) -> int:
         """Downloads a file in chunks, invoking progress_callback with bytes downloaded. Returns bytes downloaded."""
         if job.destination.exists():
@@ -94,37 +143,20 @@ class FileDownloader:
                 return 0
 
         job.destination.parent.mkdir(parents=True, exist_ok=True)
-        bytes_dl = 0
         part_file = job.destination.with_name(job.destination.name + '.part')
 
         try:
             last_error: Optional[Exception] = None
             downloaded_ok = False
+            bytes_dl = 0
             final_name = job.destination.name
+            candidates = self._download_urls(job)
 
-            for download_url in self._download_urls(job):
+            for download_url in candidates:
                 try:
-                    with self.session.get(download_url, stream=True, allow_redirects=True, timeout=30) as r:
-                        r.raise_for_status()
-
-                        content_type = r.headers.get("Content-Type", "")
-                        if "application/json" in content_type and not job.display_name.lower().endswith(".json"):
-                            raise CanvasAPIError(_("La descarga devolvio JSON inesperado en lugar de binario."))
-
-                        # Si el nombre local no tiene extensión, intentar recuperarla de Content-Disposition.
-                        if not job.destination.suffix:
-                            cd_name = self._name_from_content_disposition(r.headers.get("Content-Disposition", ""))
-                            if cd_name and Path(cd_name).suffix:
-                                final_name = Path(cd_name).name
-                                part_file = job.destination.with_name(final_name + '.part')
-
-                        with open(part_file, "wb") as f:
-                            for chunk in r.iter_content(chunk_size=8192):
-                                if chunk:
-                                    f.write(chunk)
-                                    bytes_dl += len(chunk)
-                                    if progress_callback:
-                                        progress_callback(len(chunk))
+                    bytes_dl, final_name, part_file = self._stream_to_part(
+                        download_url, part_file, job, progress_callback
+                    )
                     downloaded_ok = True
                     break
                 except (requests.HTTPError, CanvasAPIError) as e:
@@ -137,7 +169,24 @@ class FileDownloader:
                     continue
 
             if not downloaded_ok:
-                # La URL firmada pudo expirar entre la carga del árbol y la descarga.
+                # La URL firmada guardada pudo expirar o ser un endpoint de
+                # metadata; la resolvemos fresca como intento final.
+                signed = self._signed_url(job)
+                if signed and signed not in [c for c in candidates if c]:
+                    try:
+                        bytes_dl, final_name, part_file = self._stream_to_part(
+                            signed, part_file, job, progress_callback
+                        )
+                        downloaded_ok = True
+                    except (requests.HTTPError, CanvasAPIError) as e:
+                        last_error = e
+                        if part_file.exists():
+                            try:
+                                part_file.unlink()
+                            except OSError:
+                                pass
+
+            if not downloaded_ok:
                 raise last_error if last_error else CanvasAPIError(_("Todas las URLs de descarga fallaron."))
 
             if part_file.exists():

@@ -640,9 +640,27 @@ class CanvasAPIClient:
 
         if item_type == "File":
             fid = item.get("content_id")
-            if fid:
-                return self.ensure_file_in_tree(tree, course_id, fid)
-            return False
+            if not fid:
+                return False
+            if self.ensure_file_in_tree(tree, course_id, fid):
+                return True
+            # Sin metadatos por API: aun así se lista con los datos del item.
+            content = item.get("content_details", {})
+            tree.add_file(CanvasFile(
+                id=fid,
+                folder_id=None,
+                display_name=(content.get("display_name") or item.get("title") or _("archivo")),
+                module_name=module_name,
+                module_id=module_id,
+                size=content.get("size") or item.get("size"),
+                url=content.get("url"),
+                locked=content.get("locked_for_user", False),
+                hidden=content.get("hidden_for_user", False),
+                source="module",
+                course_id=course_id,
+            ))
+            tree.build_hierarchy()
+            return True
 
         if item_type == "Page":
             self.resolve_page_item(tree, course_id, item, module_name, module_id)
@@ -680,14 +698,17 @@ class CanvasAPIClient:
                         content = item.get("content_details", {})
                         fid = item.get("content_id")
                         if not fid: continue
+                        # El title del item es la etiqueta del módulo y puede
+                        # diferir del nombre real del archivo (p. ej. si el
+                        # archivo fue reemplazado); metadata pone display_name.
                         tree.add_file(CanvasFile(
                             id=fid,
                             folder_id=None,
-                            display_name=item.get("title") or _("archivo"),
+                            display_name=(content.get("display_name") or item.get("title") or _("archivo")),
                             module_name=mname,
                             module_id=mid,
                             size=content.get("size"),
-                            url=content.get("url") or item.get("url"),
+                            url=content.get("url"),
                             locked=content.get("locked_for_user", False),
                             hidden=content.get("hidden_for_user", False),
                             source="module",
@@ -728,6 +749,10 @@ class CanvasAPIClient:
                         existing.source = "folder"
                     if api_name:
                         existing.display_name = api_name
+                    # El índice de archivos trae el URL firmado real; aplicarlo
+                    # a archivos de módulo que solo tenían el endpoint de metadata.
+                    if not existing.url and f.get("url"):
+                        existing.url = f.get("url")
                 else:
                     tree.add_file(CanvasFile(
                         id=fid,
