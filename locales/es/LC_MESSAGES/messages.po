@@ -46,7 +46,7 @@ msgid "Error al cargar curso"
 msgstr "Error al cargar curso"
 
 msgid "MENU"
-msgstr "MENU"
+msgstr "MENÚ"
 
 msgid "Ver listado del curso"
 msgstr "Ver listado del curso"
@@ -331,3 +331,9 @@ msgstr "Agregue archivos. Escriba 'finalizar' para terminar. (Enter para cancela
 
 msgid "Extension (ej: .pdf) (Enter para cancelar)"
 msgstr "Extension (ej: .pdf) (Enter para cancelar)"
+
+msgid "$n archivos"
+msgstr "$n archivos"
+
+msgid "$n Descargados"
+msgstr "$n Descargados"

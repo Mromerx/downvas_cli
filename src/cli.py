@@ -227,7 +227,7 @@ def handle_download_by_section(course_tree: CourseTree, settings: Settings, down
     section_names = list(sections.keys())
     console.print(f"\n[primary]{_('Secciones disponibles:')}[/]")
     for idx, name in enumerate(section_names, start=1):
-        console.print(f"  {idx}. {name} [muted]({len(sections[name])} archivos)[/]")
+        console.print(f"  {idx}. {name} [muted]({Template(_('$n archivos')).safe_substitute(n=len(sections[name]))})[/]")
         
     choice = Prompt.ask(f"\n{_('Seleccione el numero de la seccion (Enter para cancelar)')}").strip()
     if not choice:

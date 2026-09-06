@@ -307,7 +307,7 @@ class DownloaderService:
             for job in downloaded_jobs[:10]:
                 detalle_lines.append(f"  [primary]{job.display_name}[/] [success]: {_('Descargado')}[/]")
             if len(downloaded_jobs) > 10:
-                detalle_lines.append(f"  [primary]{Template(_('... y $n archivos mas')).safe_substitute(n=len(downloaded_jobs) - 10)}[/] [success]: {_('Descargado')}s[/]")
+                detalle_lines.append(f"  [primary]{Template(_('... y $n archivos mas')).safe_substitute(n=len(downloaded_jobs) - 10)}[/] [success]: {Template(_('$n Descargados')).safe_substitute(n=len(downloaded_jobs))}[/]")
             for job in skipped_jobs:
                 detalle_lines.append(f"  [primary]{job.display_name}[/] [secondary]: {_('Omitido (ya existente)')}[/]")
             for job, err in failed_jobs:

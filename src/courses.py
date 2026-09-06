@@ -269,7 +269,7 @@ class CanvasAPIClient:
 
     def fetch_course_name(self, course_id: int) -> str:
         data = self.get_course(course_id)
-        return data.get("name") or data.get("course_code") or f"Curso {course_id}"
+        return data.get("name") or data.get("course_code") or f"{_('Curso')} {course_id}"
 
     def get_course(self, course_id: int) -> Dict[str, Any]:
         resp = self._request("GET", f"{self.base_url}/api/v1/courses/{course_id}")
